@@ -8,8 +8,8 @@ ParseState checkElseIf(){
 }
 
 ParseState checkCase(ParseState state){
-  TokenReturn token = getNextToken(true);
-  if(checkIf(peekSwitchArg(), token.string, getNextToken(true).string, null, false)){
+  Token token = getNextToken(true);
+  if(checkIf(peekSwitchArg(), token.String, getNextToken(true).String, null, false)){
     return ParseState.Switch_Taken;
   }
   return state;
@@ -30,7 +30,7 @@ Worker popWorker(){
 }
 
 void doSwitch(int depth_){
-  pushSwitchArg(getNextToken(true).string);
+  pushSwitchArg(getNextToken(true).String);
   incIndex();
   processInput(depth_+1, ParseState.Switch_Look);
 }

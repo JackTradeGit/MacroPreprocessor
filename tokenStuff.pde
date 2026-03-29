@@ -1,22 +1,4 @@
-class TokenReturn{
-  String string;
-  int nextIndex;
-  
-  TokenReturn(int n){
-    nextIndex = n;
-  }
-  
-  TokenReturn(String t, int n){
-    string = t;
-    nextIndex = n;
-  }
-  
-  String toString(){
-    return "[" + nextIndex + "]{" + string + "}";
-  }
-}
-
-TokenReturn getNextToken(boolean allowEscape){
+Token getNextToken(boolean allowEscape){
   if(hyperVerboseOutput){ println("getNextToken: \"" + CurrentLineInput + "\" @ [" + CurrentInputIndex + "]"); }
   String token = "";
   int state = 0;
@@ -48,9 +30,9 @@ TokenReturn getNextToken(boolean allowEscape){
             if(allowEscape == true){
               if(hyperVerboseOutput){ println("getNextToken:0:cleanEscape"); }
               gotString = true;
-              TokenReturn output = cleanEscape(CurrentLineInput, CurrentInputIndex, false);
+              Token output = cleanEscape(CurrentLineInput, CurrentInputIndex, false);
               CurrentInputIndex = output.nextIndex;
-              token += output.string;
+              token += output.String;
             }else{
               token += c;
             }
@@ -107,9 +89,9 @@ TokenReturn getNextToken(boolean allowEscape){
             if(allowEscape == true){
               if(hyperVerboseOutput){ println("getNextToken:1:cleanEscape"); }
               gotString = true;
-              TokenReturn output = cleanEscape(CurrentLineInput, CurrentInputIndex, false);
+              Token output = cleanEscape(CurrentLineInput, CurrentInputIndex, false);
               CurrentInputIndex = output.nextIndex;
-              token += output.string;
+              token += output.String;
             }else{
               token += c;
             }
@@ -132,16 +114,16 @@ TokenReturn getNextToken(boolean allowEscape){
   }
   
   if(hyperVerboseOutput){ println("getNextToken:output = \"" + token + "\" @ [" + CurrentInputIndex + "]"); }
-  return new TokenReturn(token, CurrentInputIndex);
+  return new Token(token, CurrentInputIndex, false);
 }
 
-TokenReturn cleanEscape(String line, int index, boolean runFunction){
+Token cleanEscape(String line, int index, boolean runFunction){
   //println("[" + line + "]{" + index + "}");
   if(line.length() > 0 && index < line.length() && line.charAt(index) == '\\'){ index++; } // eat the incoming '\\'
   
   String token = "";
   int state = 0;
-  VariableType type = VariableType.String;
+  TokenType type = TokenType.String;
   boolean outputEscape = true;
   
   for(; index < line.length() && state != -1; index++){
@@ -188,27 +170,27 @@ TokenReturn cleanEscape(String line, int index, boolean runFunction){
             break;
           case '!': // error output
             token += "\\!";
-            type = VariableType.Error;
+            type = TokenType.Error;
             state = 1;
             break;
           case '#': // built-in function
             outputEscape = false;
-            type = VariableType.Function;
+            type = TokenType.Function;
             state = 1;
             break;
           case '%': // macro arg
             outputEscape = false;
-            type = VariableType.Argument;
+            type = TokenType.Argument;
             state = 1;
             break;
           case '&': // global var
             outputEscape = false;
-            type = VariableType.Variable;
+            type = TokenType.Variable;
             state = 1;
             break;
           case '$': // built-in var
             outputEscape = false;
-            type = VariableType.Builtin;
+            type = TokenType.Builtin;
             state = 1;
             break;
           case '~': // transitory macro variable
@@ -220,12 +202,12 @@ TokenReturn cleanEscape(String line, int index, boolean runFunction){
             break;
           case '^': // stack operations
             outputEscape = false;
-            type = VariableType.StackFunction;
+            type = TokenType.StackFunction;
             state = 1;
             break;
           case '>': // file operations
             outputEscape = false;
-            type = VariableType.FileFunction;
+            type = TokenType.FileFunction;
             state = 1;
             break;
           case '(': // escaped open-paren means we need to do infixToRPN stuff
@@ -265,9 +247,9 @@ TokenReturn cleanEscape(String line, int index, boolean runFunction){
               // not that simple though, as caller may still be using old line...
               // we may have to make line be global?
             }//else{
-              TokenReturn output = cleanEscape(line, index, outputEscape); // if we're not stripping escape tokens, then don't do it on recurse
+              Token output = cleanEscape(line, index, outputEscape); // if we're not stripping escape tokens, then don't do it on recurse
               index = output.nextIndex;
-              token += output.string;
+              token += output.String;
             //}
             break;
           
@@ -350,5 +332,5 @@ TokenReturn cleanEscape(String line, int index, boolean runFunction){
   
   //VariableReturn out = new VariableReturn(token, index-1, type);
   //println(out.type() + ":" + out + ";" + token);
-  return new TokenReturn(token, index-1); // token-1 due to increment after use!
+  return new Token(token, index-1, false); // token-1 due to increment after use!
 }

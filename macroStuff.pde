@@ -149,9 +149,9 @@ class Macro{ // MacroFile combined class? plus a pun...
 void buildMacro(){
   //println("<buildMacro>");
   //println(line_);
-  TokenReturn token = getNextToken(true);
+  Token token = getNextToken(true);
   int originLine = getIndex();
-  String name = token.string;
+  String name = token.String;
   MacroArg[] args = getMacroArgs(CurrentLineInput, token.nextIndex);
   StringList content = new StringList();
   IntList lineNum = new IntList();
@@ -164,7 +164,7 @@ void buildMacro(){
     CurrentInputIndex = 0;
     token = getNextToken(false);
     
-    switch(token.string){
+    switch(token.String){
       case ".endm":
         //println("<endm>");
         Macros.put(name, new Macro(name, args, content.toArray(), lineNum.toArray(), getFileName(), originLine));
@@ -234,9 +234,9 @@ MacroArg[] getMacroArgs(String line, int index){
             break;
           
           case '\\':
-            TokenReturn output = cleanEscape(line, index, true);
+            Token output = cleanEscape(line, index, true);
             index = output.nextIndex;
-            token += output.string;
+            token += output.String;
             break;
           
           case '(':

@@ -1,4 +1,4 @@
-enum VariableType{
+enum TokenType{
   Integer,
   //Float, // might need to be converted to hex format for some assemblers
   String,
@@ -17,8 +17,8 @@ enum VariableType{
   Error, // error output
 }
 
-class VariableReturn{
-  VariableType Type;
+class Token{
+  TokenType Type;
   String String;
   int Integer;
   //float Float;
@@ -26,24 +26,35 @@ class VariableReturn{
   boolean Number;
   int nextIndex;
   
-  VariableReturn(String s){
+  Token(String s){
     String = s;
-    Type = VariableType.String;
+    Type = TokenType.String;
   }
   
-  VariableReturn(String s, int i){
+  Token(String s, int i){
     String = s;
     Integer = i;
     Number = true;
-    Type = VariableType.Integer;
+    Type = TokenType.Integer;
   }
   
-  VariableReturn(String s, VariableType t){
+  Token(String s, int i, boolean n){
+    String = s;
+    if(n){
+      Integer = i;
+    }else{
+      nextIndex = i;
+    }
+    Number = n;
+    Type = n ? TokenType.Integer : TokenType.String;
+  }
+  
+  Token(String s, TokenType t){
     String = s;
     Type = t;
   }
   
-  VariableReturn(String s, int n, VariableType t){
+  Token(String s, int n, TokenType t){
     String = s;
     nextIndex = n;
     Type = t;
@@ -85,7 +96,7 @@ class VariableReturn{
 }
 
 void parseLet(){
-  parseLet(getNextToken(true).string, getNextToken(true).string, getNextToken(true).string);
+  parseLet(getNextToken(true).String, getNextToken(true).String, getNextToken(true).String);
 }
 
 void parseLet(String variable, String action, String secondToken){
@@ -100,8 +111,8 @@ void parseLet(String variable, String action, String secondToken){
       return;
   }
   
-  VariableReturn firstVar = parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0");
-  VariableReturn secondVar = parseVariables(secondToken);
+  Token firstVar = parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0");
+  Token secondVar = parseVariables(secondToken);
   if(hyperVerboseOutput){ println("parseLet: [" + variable + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
   
   if(firstVar.Number && secondVar.Number){
@@ -256,7 +267,7 @@ String getBuiltin(String name){
       using {} grabs attention better...
 */
 
-VariableReturn parseVariables(String line){ // going through entire line to convert remaining bits into final output
+Token parseVariables(String line){ // going through entire line to convert remaining bits into final output
   if(hyperVerboseOutput){ println("parseVariables: " + line); }
   if(line == null){ return null; } // new VariableReturn("");
   String value = "";
@@ -267,9 +278,9 @@ VariableReturn parseVariables(String line){ // going through entire line to conv
     switch(c){
       case '\\':
         if(hyperVerboseOutput){ println("parseVariables:cleanEscape"); }
-        TokenReturn output = cleanEscape(line, i, true);
+        Token output = cleanEscape(line, i, true);
         i = output.nextIndex;
-        value += output.string;
+        value += output.String;
         break;
       
       default:
@@ -279,9 +290,9 @@ VariableReturn parseVariables(String line){ // going through entire line to conv
   }
   
   if(value.length() > 0){
-    VariableReturn tmp = tryInt(value);
+    Token tmp = tryInt(value);
     if(tmp.Number){ return tmp; }
   }
   
-  return new VariableReturn(value);
+  return new Token(value);
 }

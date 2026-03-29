@@ -18,18 +18,18 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
     CurrentLineInput = getLine();
     CurrentLineOutput = CurrentLineInput;
     CurrentInputIndex = 0;
-    TokenReturn token = getNextToken(false);
-    if(token.string.length() > 0 && token.string.charAt(0) == ';'){ // skip comment-only lines
+    Token token = getNextToken(false);
+    if(token.String.length() > 0 && token.String.charAt(0) == ';'){ // skip comment-only lines
       if(maintainComments){ _output.append(CurrentLineInput); }
       popFileIfLastLine();
       continue;
     }
     boolean skip = true;
-    if(hyperVerboseOutput){ println("[" + getIndex() + "]{" + state.name() + "}<" + token.string + "> " + CurrentLineInput); }
+    if(hyperVerboseOutput){ println("[" + getIndex() + "]{" + state.name() + "}<" + token.String + "> " + CurrentLineInput); }
     
     switch(state){
       case Entry:
-        switch(token.string){
+        switch(token.String){
           case ".include": checkIncludeFile(); break;
           case ".if": doIf(depth_); break;
           case ".let": parseLet(); break; // let/set? - set a variable that can be modified
@@ -39,12 +39,12 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
           case ".switch": doSwitch(depth_); break;
           case ".begin": doBegin(depth_); break;
           case "/*": cleanMultilineComments(); break;
-          default: skip = checkMacros(token.string); break;
+          default: skip = checkMacros(token.String); break;
         }
         break;
       
       case If_True: // if statement true
-        switch(token.string){
+        switch(token.String){
           case ".include": checkIncludeFile(); break;
           case ".if": doIf(depth_); break;
           case ".else": case ".elseif": state = ParseState.If_Skip; break;
@@ -54,12 +54,12 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
           case ".switch": doSwitch(depth_); break;
           case ".begin": doBegin(depth_); break;
           case "/*": cleanMultilineComments(); break;
-          default: skip = checkMacros(token.string); break;
+          default: skip = checkMacros(token.String); break;
         }
         break;
       
       case If_False: // if statement false
-        switch(token.string){
+        switch(token.String){
           case ".if": curDepth++; break;
           case ".elseif": if(curDepth == depth_){ state = checkElseIf(); } break;
           case ".else": if(curDepth == depth_){ state = ParseState.If_True; } break;
@@ -70,7 +70,7 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
         break;
       
       case If_Skip: // skip all until .endif
-        switch(token.string){
+        switch(token.String){
           case ".if": curDepth++; break;
           case ".endif": curDepth--; if(curDepth < depth_){ return; } break;
           case "/*": cleanMultilineComments(); break;
@@ -79,7 +79,7 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
         break;
       
       case Switch_Look: // scan through lines looking for .case or .default
-        switch(token.string){
+        switch(token.String){
           case ".case": state = checkCase(state); break;
           case ".default": state = ParseState.Switch_Taken; break;
           case ".endsw": popSwitchArg(); return;
@@ -89,7 +89,7 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
         break;
         
       case Switch_Taken: // case was found, output contents until .case, .default, or .endsw
-        switch(token.string){
+        switch(token.String){
           case ".include": checkIncludeFile(); break;
           case ".if": doIf(depth_); break;
           case ".let": parseLet(); break;
@@ -100,12 +100,12 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
           case ".endsw": popSwitchArg(); return;
           case ".begin": doBegin(depth_); break;
           case "/*": cleanMultilineComments(); break;
-          default: skip = checkMacros(token.string); break;
+          default: skip = checkMacros(token.String); break;
         }
         break;
         
       case Switch_Skip: // skip all lines until .endsw is found
-        switch(token.string){
+        switch(token.String){
           case ".switch": curDepth++; break;
           case ".endsw": curDepth--; if(curDepth < depth_){ popSwitchArg(); return; } break;
           case "/*": cleanMultilineComments(); break;
@@ -114,7 +114,7 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
         break;
       
       case Begin_Search:
-        switch(token.string){
+        switch(token.String){
           case ".begin": curDepth++; break;
           case ".until":
           case ".repeat": curDepth--; if(curDepth < depth_){ doBeginEnd(); state = ParseState.Begin_Loop; } break;
@@ -124,7 +124,7 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
         break;
       
       case Begin_Loop:
-        switch(token.string){
+        switch(token.String){
           case ".include": checkIncludeFile(); break;
           case ".if": doIf(depth_); break;
           case ".let": parseLet(); break;
@@ -135,7 +135,7 @@ void processInput(int depth_, ParseState state_){ // current depth of if stateme
           case ".until": if(checkIf(true)){ popBegin(); return; }else{ setIndex(peekBegin()); } break;
           case ".repeat": setIndex(peekBegin()); break;
           case "/*": cleanMultilineComments(); break;
-          default: skip = checkMacros(token.string); break;
+          default: skip = checkMacros(token.String); break;
         }
         break;
     }

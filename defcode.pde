@@ -260,8 +260,8 @@ void cleanMultilineComments(){
     CurrentLineInput = getLine();
     if(maintainComments){ _output.append("; " + CurrentLineInput); }
     CurrentInputIndex = 0;
-    TokenReturn token = getNextToken(false);
-    switch(token.string){
+    Token token = getNextToken(false);
+    switch(token.String){
       case "/*":
         depth++; // handle nested multiline comments
         continue;
@@ -279,7 +279,7 @@ void cleanMultilineComments(){
     
     //println(line + ":" + depth);
     while(token.nextIndex < CurrentLineInput.length()){ // handle multiline comments that exist on a single line
-      switch(token.string){
+      switch(token.String){
         case "/*":
           depth++; // handle nested multiline comments
           break;
@@ -299,7 +299,7 @@ void cleanMultilineComments(){
   }
 }
 
-VariableReturn tryInt(String in){
+Token tryInt(String in){
   String output = "";
   int state = 0;
   boolean valid = true;
@@ -444,7 +444,7 @@ VariableReturn tryInt(String in){
   }
   
   if(valid){
-    return new VariableReturn(in, value);
+    return new Token(in, value);
   }
-  else{ return new VariableReturn(in); }
+  else{ return new Token(in); }
 }

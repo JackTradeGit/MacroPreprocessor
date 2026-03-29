@@ -111,7 +111,6 @@ String lineToRPN(String line, int index){
   String output = "";
   String token = "";
   int parenDepth = 1; // we start with a depth of 1 due to entering on an escaped open-paren
-  boolean isFloat = false; // do we calculate the result as an int or a float?
   
   for(int i = index; i < line.length() && state != -1; i++){
     char c = line.charAt(i);
@@ -141,17 +140,14 @@ String lineToRPN(String line, int index){
             break;
           
           case '\\': // escaped values, like macro args, global variables, built-in functions, etc.
-            TokenReturn tmp = cleanEscape(line, i, false);
-            output += tmp.string;
+            Token tmp = cleanEscape(line, i, false);
+            output += tmp.String;
             i = tmp.nextIndex;
             break; // may want to defer calculating anything within escaped values, unless they do their own infixToRPN work...
           
           default:
             if(isNumber(c)){
               output += c;
-            }else if(c == '.'){
-              output += c;
-              isFloat = true;
             }else{
               if(i+1 < line.length()){
                 char c2 = line.charAt(i+1);

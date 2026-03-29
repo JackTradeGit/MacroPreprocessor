@@ -1,10 +1,10 @@
 boolean checkIf(boolean default_){
-  return checkIf(getNextToken(true).string, getNextToken(true).string, getNextToken(true).string, getNextToken(true).string, default_);
+  return checkIf(getNextToken(true).String, getNextToken(true).String, getNextToken(true).String, getNextToken(true).String, default_);
 }
 
 boolean checkIf(String firstToken, String action, String secondToken, String thirdToken, boolean default_){
-  VariableReturn firstVar = parseVariables(firstToken);
-  VariableReturn secondVar = parseVariables(secondToken);
+  Token firstVar = parseVariables(firstToken);
+  Token secondVar = parseVariables(secondToken);
   if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
   if(firstToken.equals("")){ return default_; } // || action.equals("") || secondToken.string.equals("")
   
@@ -55,7 +55,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
           return default_;
       }
     }else{
-      VariableReturn thirdVar = parseVariables(thirdToken);
+      Token thirdVar = parseVariables(thirdToken);
       switch(action){
         case "<!>": // not between
           invert = true;
@@ -90,34 +90,34 @@ boolean checkCase(){
   int state = 0;
   StringList output = new StringList();
   
-  TokenReturn token = getNextToken(true);
+  Token token = getNextToken(true);
   for(; CurrentInputIndex < CurrentLineInput.length() && state != -1; CurrentInputIndex++){
     switch(state){
       case 0:
-        switch(token.string){
+        switch(token.String){
           case "[": // start of value list
             state = 1;
             break;
           default: // must be a single value
-            if(CurrentMacroArgs != null){ return checkIf(CurrentMacroArgs[0].Name, "==", token.string, null, false); }
+            if(CurrentMacroArgs != null){ return checkIf(CurrentMacroArgs[0].Name, "==", token.String, null, false); }
             else{ return false; }
         }
         break;
       
       case 1:
-        switch(token.string){
+        switch(token.String){
           case "]": state = -1; break; // end of value list
           case "..": state = 2; break; // denotes value range
           case ",": break; // eat value seperator
-          default: output.append(token.string); break; // must be a value
+          default: output.append(token.String); break; // must be a value
         }
         break;
       
       case 2: // denotes value range {Ruby range syntax} ([1..4] == [1,2,3,4])([1,2,10..13] == [1,2,10,11,12,13])([1..4,10..8] == [1,2,3,4,10,9,8])
         if(output.size() > 0){
-          for(int i = int(output.get(output.size()-1)) + 1; i <= int(token.string); i++){ output.append(str(i)); }
+          for(int i = int(output.get(output.size()-1)) + 1; i <= int(token.String); i++){ output.append(str(i)); }
         }else{
-          for(int i = 0; i <= int(token.string); i++){ output.append(str(i)); }
+          for(int i = 0; i <= int(token.String); i++){ output.append(str(i)); }
         }
         state = 1;
         break;

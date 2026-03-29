@@ -26,8 +26,8 @@ String parseFunction(String input){
       break;
     
     case "random":
-      VariableReturn min = tryInt(args[1].Name);
-      VariableReturn max = tryInt(args[2].Name);
+      Token min = tryInt(args[1].Name);
+      Token max = tryInt(args[2].Name);
       if(min.Number == true && max.Number == true){
         output += random(min.Integer, max.Integer);
       }else{
@@ -36,8 +36,8 @@ String parseFunction(String input){
       break;
     
     case "pow":
-      VariableReturn base = tryInt(args[1].Name);
-      VariableReturn exponent = tryInt(args[2].Name);
+      Token base = tryInt(args[1].Name);
+      Token exponent = tryInt(args[2].Name);
       if(base.Number == true && exponent.Number == true){
         output += pow(base.Integer, exponent.Integer);
       }else{

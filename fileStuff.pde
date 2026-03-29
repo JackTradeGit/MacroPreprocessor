@@ -103,7 +103,7 @@ class FileHolder{
 }
 
 void checkIncludeFile(){
-  getNewFile(getFile().file, getNextToken(true).string);
+  getNewFile(getFile().file, getNextToken(true).String);
 }
 
 PathReturn splitFilepath(String file){
