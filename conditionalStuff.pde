@@ -8,10 +8,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
   if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
   if(firstToken.equals("")){ return default_; } // || action.equals("") || secondToken.string.equals("")
   
-  if(firstVar.Number && secondVar.Number){
-    VariableReturn thirdVar = thirdToken == null ? null : parseVariables(thirdToken);
-    return checkCondition(firstVar, action, secondVar, thirdVar, default_);
-  }else{
+  if(firstVar.Number == false || secondVar.Number == false){
     switch(action){
       case "==":
         return firstVar.String.equals(secondVar.String); // check if strings are equal
@@ -27,81 +24,64 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
         }
       
       default:
-        //println("checkIf.unknownOperator: " + action);
-        appendOutput("\\!{checkIf.unknownOperator: " + action + "}");
+        appendOutput("\\!{checkIf.string.unknownOperator: " + action + "}");
         return default_;
     }
-  }
-}
-
-boolean checkCondition(VariableReturn firstVar, String action, VariableReturn secondVar, VariableReturn thirdVar, boolean default_){
-  int comp = compare(firstVar, secondVar);
-  boolean invert = false;
-  switch(action){
-    case "==": // same
-      return comp == 0;
-    
-    case "!=": // not same
-      return comp != 0;
-    
-    case ">": // greater than
-      return comp > 0;
-    
-    case "<": // less than
-      return comp < 0;
-    
-    case ">=": // greater than or equal
-      return comp >= 0;
-    
-    case "<=": // less than or equal
-      return comp <= 0;
-    
-    case "<!>": // not between
-      invert = true;
-    case "<>": // between
-      if(thirdVar.Number != true){
-        return default_; // NAN
-      }else{
-        int comp2 = compare(firstVar, thirdVar);
-        //println(secondVar + " < " + firstVar + " = " + comp + ", " + firstVar + " < " + thirdVar + " = " + comp2 + ": = " + ((comp > 0 && comp2 < 0) ^ invert));
-        return (comp > 0 && comp2 < 0) ^ invert; // v2 < v1 < v3
+  }else{
+    int comp = Integer.compare(firstVar.Integer, secondVar.Integer);
+    boolean invert = false;
+    if(thirdToken == null || thirdToken.equals("")){
+      switch(action){
+        case "==": // same
+          return comp == 0;
+        
+        case "!=": // not same
+          return comp != 0;
+        
+        case ">": // greater than
+          return comp > 0;
+        
+        case "<": // less than
+          return comp < 0;
+        
+        case ">=": // greater than or equal
+          return comp >= 0;
+        
+        case "<=": // less than or equal
+          return comp <= 0;
+        
+        default:
+          appendOutput("\\!{checkCondition.twovar.unknownOperator: " + action + "}");
+          return default_;
       }
-    
-    case "<!=>": // not between or equal
-      invert = true;
-    case "<=>": // between or equal
-      if(thirdVar.Number != true){
-        return default_; // NAN
-      }else{
-        int comp2 = compare(firstVar, thirdVar);
-        return ((comp > 0 && comp2 < 0) || comp == 0 || comp2 == 0) ^ invert; // v2 <= v1 <= v3
+    }else{
+      VariableReturn thirdVar = parseVariables(thirdToken);
+      switch(action){
+        case "<!>": // not between
+          invert = true;
+        case "<>": // between
+          if(thirdVar.Number != true){
+            return default_; // NAN
+          }else{
+            int comp2 = Integer.compare(firstVar.Integer, thirdVar.Integer);
+            return (comp > 0 && comp2 < 0) ^ invert; // v2 < v1 < v3
+          }
+        
+        case "<!=>": // not between or equal
+          invert = true;
+        case "<=>": // between or equal
+          if(thirdVar.Number != true){
+            return default_; // NAN
+          }else{
+            int comp2 = Integer.compare(firstVar.Integer, thirdVar.Integer);
+            return ((comp > 0 && comp2 < 0) || comp == 0 || comp2 == 0) ^ invert; // v2 <= v1 <= v3
+          }
+        
+        default:
+          appendOutput("\\!{checkCondition.trivar.unknownOperator: " + action + "}");
+          return default_;
       }
-    
-    default:
-      //println("checkCondition.unknownOperator: " + action);
-      appendOutput("\\!{checkCondition.unknownOperator: " + action + "}");
-      return default_;
-  }
-}
-
-// TODO: this might have issues due to float rounding...
-int compare(VariableReturn one, VariableReturn two){ // -(one < two), 0(one == two), +(one > two)
-  switch(one.Type){
-    case Integer:
-      switch(two.Type){
-        case Integer: return Integer.compare(one.Integer, two.Integer); // Integer.compare should be more... reliable?
-        case Float: return Float.compare(one.Integer, two.Float); // Float.compare should be more... reliable?
-        default: println("compare:v2 was NAN"); return 0;
-      }
-    
-    case Float:
-      switch(two.Type){
-        case Integer: return Float.compare(one.Float, two.Float);
-        case Float: return Float.compare(one.Float, two.Float);
-        default: println("compare:v2 was NAN"); return 0;
-      }
-    
-    default: println("compare:v1 was NAN");return 0;
+    }
   }
 }
 

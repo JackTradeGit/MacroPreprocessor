@@ -105,7 +105,7 @@ String compareVersions(String version, String action, String first, String secon
     case "<": // less than
       //println("checkVer: " + _VERSION + " " + args[1].Name + " " + args[2].Name);
       for(int i = 0; i < checkLength; i++){
-        if(checkCondition(parseVariables(verArr[i]), action, parseVariables(v1[i]), null, false)){
+        if(checkIf(verArr[i], action, v1[i], null, false)){
           cond = true;
           break; // break out of loop
         }
@@ -143,7 +143,7 @@ String compareVersions(String version, String action, String first, String secon
         case "<>": // between
           //println("checkVer: " + _VERSION + " " + args[1].Name + " " + args[2].Name + ", " + args[3].Name);
           for(int i = 0; i < checkLength; i++){
-            if(equEach[i] == false && checkCondition(parseVariables(verArr[i]), action, parseVariables(v1[i]), parseVariables(v2[i]), false)){
+            if(equEach[i] == false && checkIf(verArr[i], action, v1[i], v2[i], false)){
               cond = true;
               break; // break out of loop
             }
@@ -165,7 +165,7 @@ boolean isAlpha(char c){
 }
 
 boolean isHex(char c){
-  return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+  return isNumber(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 }
 
 boolean isBinary(char c){
@@ -303,7 +303,13 @@ VariableReturn tryInt(String in){
   String output = "";
   int state = 0;
   boolean valid = true;
-  boolean isFloat = false;
+  
+  //perform self check on number overflow?
+  //should work for any radix?
+  //radix = 10;
+  //notOverflow = intVal < (Integer.MAX_VALUE - digVal) / radix;
+  //if(notOverflow){ intVal = (intVal * radix) + digVal; }
+  //else{ } // value (would) overflow, therefore we need to error out
   
   char c = ' ';
   for(int i = 0; i < in.length(); i++){
@@ -340,12 +346,6 @@ VariableReturn tryInt(String in){
             state = 4;
             break;
           
-          case '.': // 0.float
-            output += "0.";
-            isFloat = true;
-            state = 5;
-            break;
-          
           default: // decimal
             state = 5;
             break;
@@ -354,7 +354,11 @@ VariableReturn tryInt(String in){
       
       case 2: // hexadecimal
         if(isHex(c)){
+          valid = true;
           output += c;
+        }if(c == ' ' || c == '\t'){
+          valid = true;
+          state = -1;
         }else{
           valid = false;
           state = -1;
@@ -363,7 +367,11 @@ VariableReturn tryInt(String in){
       
       case 3: // binary
         if(isBinary(c)){
+          valid = true;
           output += c;
+        }if(c == ' ' || c == '\t'){
+          valid = true;
+          state = -1;
         }else{
           valid = false;
           state = -1;
@@ -372,7 +380,11 @@ VariableReturn tryInt(String in){
       
       case 4: // octal
         if(isOctal(c)){
+          valid = true;
           output += c;
+        }if(c == ' ' || c == '\t'){
+          valid = true;
+          state = -1;
         }else{
           valid = false;
           state = -1;
@@ -381,10 +393,11 @@ VariableReturn tryInt(String in){
       
       case 5: // decimal
         if(isNumber(c)){
+          valid = true;
           output += c;
-        }else if(c == '.'){
-          output += c;
-          isFloat = true;
+        //}else if(c == ' ' || c == '\t'){
+          //valid = true;
+          //state = -1;
         }else{
           valid = false;
           state = -1;
@@ -406,28 +419,22 @@ VariableReturn tryInt(String in){
   }
   
   int value = 0;
-  float flo = 0;
   if(valid){
     switch(state){
       case 2: // hexadecimal
-        if(isFloat){ flo = parseFloat(output, 16); }
-        else{ value = parseInt(output, 16); }
+        value = parseInt(output, 16);
         break;
       
       case 3: // binary
-        if(isFloat){ flo = parseFloat(output, 2); }
-        else{ value = parseInt(output, 2); }
+        value = parseInt(output, 2);
         break;
       
       case 4: // octal
-        if(isFloat){ flo = parseFloat(output, 8); }
-        else{ value = parseInt(output, 8); }
+        value = parseInt(output, 8);
         break;
       
       case 5: // decimal
-        if(isFloat){ flo = parseFloat(output, 10); }
-        else{ value = parseInt(output, 10); }
-        
+        value = parseInt(output, 10);
         break;
       
       default: // if a line is just spaces or tabs...
@@ -437,8 +444,7 @@ VariableReturn tryInt(String in){
   }
   
   if(valid){
-    if(isFloat){ return new VariableReturn(in, flo); }
-    else{ return new VariableReturn(in, value); }
+    return new VariableReturn(in, value);
   }
   else{ return new VariableReturn(in); }
 }

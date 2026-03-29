@@ -1,6 +1,6 @@
 enum VariableType{
   Integer,
-  Float, // might need to be converted to hex format for some assemblers
+  //Float, // might need to be converted to hex format for some assemblers
   String,
   Char, // to be used for character arithmetic (sbc 'A' - '0')
   Byte, // for db (Define Byte)
@@ -21,7 +21,7 @@ class VariableReturn{
   VariableType Type;
   String String;
   int Integer;
-  float Float;
+  //float Float;
   char Char;
   boolean Number;
   int nextIndex;
@@ -38,13 +38,6 @@ class VariableReturn{
     Type = VariableType.Integer;
   }
   
-  VariableReturn(String s, float f){
-    String = s;
-    Float = f;
-    Number = true;
-    Type = VariableType.Float;
-  }
-  
   VariableReturn(String s, VariableType t){
     String = s;
     Type = t;
@@ -59,7 +52,6 @@ class VariableReturn{
   String getNumber(){
     switch(Type){
       case Integer: return "" + Integer;
-      case Float: return "" + Float;
       default: return "0";
     }
   }
@@ -82,7 +74,6 @@ class VariableReturn{
   String toString(){
     switch(Type){
       case Integer: return str(Integer);
-      case Float: return str(Float);
       case Argument:
       case Variable:
       case Function:
@@ -114,23 +105,7 @@ void parseLet(String variable, String action, String secondToken){
   if(hyperVerboseOutput){ println("parseLet: [" + variable + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
   
   if(firstVar.Number && secondVar.Number){
-    switch(firstVar.Type){
-      case Integer:
-        switch(secondVar.Type){
-          case Integer: updateVariable(variable, str(parseLet(firstVar.Integer, action, secondVar.Integer))); break;
-          case Float: updateVariable(variable, str(parseLet(firstVar.Integer, action, secondVar.Float))); break;
-          default: break;
-        }
-        break;
-      case Float:
-        switch(secondVar.Type){
-          case Integer: updateVariable(variable, str(parseLet(firstVar.Float, action, secondVar.Integer))); break;
-          case Float: updateVariable(variable, str(parseLet(firstVar.Float, action, secondVar.Float))); break;
-          default: break;
-        }
-        break;
-      default: break;
-    }
+    updateVariable(variable, str(parseLet(firstVar.Integer, action, secondVar.Integer)));
   }else{
     switch(action){
       case "+=":
@@ -204,28 +179,6 @@ int parseLet(int firstVar, String action, int secondVar){
     
     case "^=":
       return firstVar ^ secondVar;
-    
-    default:
-      return secondVar;
-  }
-}
-
-float parseLet(float firstVar, String action, float secondVar){
-  switch(action){
-    case "+=":
-      return firstVar + secondVar; // check if integers are equal
-    
-    case "-=":
-      return firstVar - secondVar;
-    
-    case "*=":
-      return firstVar * secondVar;
-    
-    case "/=":
-      return firstVar / secondVar;
-    
-    case "%=":
-      return firstVar % secondVar;
     
     default:
       return secondVar;
