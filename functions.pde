@@ -115,6 +115,23 @@ String parseFunction(String input){
       // \#{formatStr, "this is a {0} that {1} to be {2}", string, needs, formatted}
       // \#{formatStr, "this is a {string} that {needs} to be {formatted}"}
       // may need to change how args[] is populated, so that we can know indices...
+      break;
+    
+    case "eval": // \#{eval, "out = a * b", out, a=10, b=2.5}
+      //println("parseFunction: " + input);
+      //print("parseFunction:args = ");printArray(args);
+      String strExpr = stripStr(args[1].Name); // get expression to eval
+      //println("eval: " + strExpr);
+      String out = args[2].Name; // get var from expression to output
+      Algorithm a = Compile.algorithm(strExpr, false);
+      for(int i = 3; i < args.length; i++){
+        String v = args[i].Value; // dang it... do I really have to bring back floats?
+        //println(args[i].Name + " = " + tryInt(args[i].Value) + " (" + tryInt(args[i].Value).type() + ")");
+        a.eval(args[i].Name, v); // v.contains(".") ? Float.parseFloat(v) : Integer.parseInt(v));
+      }
+      //a.showVariables();
+      output = str(a.answer(out).toInteger());
+      break;
   }
   
   return output;
