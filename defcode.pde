@@ -61,7 +61,12 @@ String[] splitVersion(String input){
     tmp[2] = split(tmp[2], "-")[0]; // 0-pr -> 0
   }
   
-  return tmp;
+  String[] out = new String[4];
+  for(int i = 0; i < out.length && i < tmp.length; i++){
+    out[i] = tmp[i];
+  }
+  
+  return out;
 }
 
 boolean compareVersions(String version, String action, String first, String second){
@@ -75,46 +80,56 @@ boolean compareVersions(String version, String action, String first, String seco
   if(action == null){ appendOutput("\\!{compareVersions: action to try is required!"); return false; }
   if(first == null){ appendOutput("\\!{compareVersions: version to check against is required!}"); return false; }
   
+  String[] verArr = splitVersion(version);
   String[] v1 = splitVersion(first);
   
-  String[] verArr = splitVersion(version);
-  int checkLength = verArr.length;
+  boolean cond = true;
   for(int i = 0; i < verArr.length; i++){
-    if(verArr[i] == null){
-      checkLength = i;
+    if(verArr[i] == null || v1[i] == null){
+      cond = false;
       break;
     }
-  }
-  checkLength = min(checkLength, v1.length);
-  
-  boolean equ = true;
-  for(int i = 0; i < checkLength; i++){
-    equ &= v1[i].equals(verArr[i]); // _version == v1
+    cond &= v1[i].equals(verArr[i]); // _version == v1
   }
   
   switch(action){
     case "!=": // not same
-      return !equ;
+      return !cond;
     
     case "==": // same
-      return equ;
+      return cond;
     
     case ">=": // greater than or equal
-      return equ || compareVersions(version, ">", first, null);
+      if(cond == true){ return true; }
+      action = ">";
+      break;
     
     case "<=": // less than or equal
-      return equ || compareVersions(version, "<", first, null);
-    
+      if(cond == true){ return true; }
+      action = "<";
+      break;
+  }
+  
+  cond = false;
+  switch(action){
     case ">": // greater than
-    case "<": // less than
-      //println("checkVer: " + _VERSION + " " + args[1].Name + " " + args[2].Name);
-      for(int i = 0; i < checkLength; i++){
-        if(checkIf(verArr[i], action, v1[i], null, false)){
+      for(int i = 0; i < verArr.length; i++){
+        if(checkIf(verArr[i] != null ? verArr[i] : "-1", ">", v1[i] != null ? v1[i] : "-1", null, false)){
+          cond = true;
           break; // break out of loop
         }
-        //println(_version[i] + " " + args[1].Name + " " + v1[i] + " = " + cond + " / " + equ);
       }
-      break;
+      return cond;
+    
+    case "<": // less than
+      for(int i = 0; i < verArr.length; i++){
+        //println(verArr[i] + " < " + v1[i] + " = " + checkIf(verArr[i] != null ? verArr[i] : "-1", "<", v1[i] != null ? v1[i] : "-1", null, false));
+        if(checkIf(verArr[i] != null ? verArr[i] : "-1", "<", v1[i] != null ? v1[i] : "-1", null, false)){
+          cond = true;
+          break; // break out of loop
+        }
+      }
+      return cond;
     
     case "<!=>": // not between or equal
     case "<=>": // between or equal
