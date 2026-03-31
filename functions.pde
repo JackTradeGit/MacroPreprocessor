@@ -95,12 +95,12 @@ String parseFunction(String input){
     
     case "checkVer":
       if(args.length < 3){ return "\\!{checkVer: not enough args " + (args.length-1) + "is < 2}"; }
-      output = compareVersions(_VERSION, args[1].Name, args[2].Name, args.length > 3 ? args[3].Name : "");
+      output = str(compareVersions(_VERSION, args[1].Name, args[2].Name, args.length > 3 ? args[3].Name : ""));
       break;
     
     case "compareVer":
       if(args.length < 4){ return "\\!{compareVer: not enough args " + (args.length-1) + "is < 3}"; }
-      output = compareVersions(args[1].Name, args[2].Name, args[3].Name, args.length > 4 ? args[4].Name : "");
+      output = str(compareVersions(args[1].Name, args[2].Name, args[3].Name, args.length > 4 ? args[4].Name : ""));
       break;
     
     case "debug":
@@ -118,19 +118,17 @@ String parseFunction(String input){
       break;
     
     case "eval": // \#{eval, "out = a * b", out, a=10, b=2.5}
-      //println("parseFunction: " + input);
-      //print("parseFunction:args = ");printArray(args);
-      String strExpr = stripStr(args[1].Name); // get expression to eval
-      //println("eval: " + strExpr);
-      String out = args[2].Name; // get var from expression to output
-      Algorithm a = Compile.algorithm(strExpr, false);
+      Algorithm algo = Compile.algorithm(stripStr(args[1].Name), false); // get algorithm to eval
       for(int i = 3; i < args.length; i++){
-        String v = args[i].Value; // dang it... do I really have to bring back floats?
-        //println(args[i].Name + " = " + tryInt(args[i].Value) + " (" + tryInt(args[i].Value).type() + ")");
-        a.eval(args[i].Name, v); // v.contains(".") ? Float.parseFloat(v) : Integer.parseInt(v));
+        algo.eval(args[i].Name, args[i].Value); // add each input variable to the algorithm
       }
       //a.showVariables();
-      output = str(a.answer(out).toInteger());
+      output = str(algo.answer(args[2].Name).toInteger()); // get output variable from algorithm
+      break;
+    
+    case "expr": // \#{expr, "10 * 2.5"}
+      Expression expr = Compile.expression(stripStr(args[1].Name), false); // get expression to eval
+      output = str(expr.answer().toInteger()); // get output from expression
       break;
   }
   

@@ -12,6 +12,8 @@ HashMap<String, String> _TmpGlobalVars = new HashMap<String, String>(); // ditto
 ArrayList<HashMap<String, String>> _TmpGlobalVarsArr = new ArrayList<HashMap<String, String>>(); // ditto, but a way to easily save and restore global variables
 HashMap<String, StringList> Stacks = new HashMap<String, StringList>(); // hashmap of data stacks for use in complex preprocessing
 
+// How many changes, and how much effort, would it be to change _Vars, Stacks, and the other bits, to use Token's?
+
 boolean maintainComments = false; // should comments be passed on, or cleaned up
 boolean showLines = false; // show all lines, including 'eaten' ones
 boolean concatenateFiles = true; // combine all input files into one output file
@@ -49,7 +51,7 @@ String _program_name = "Assembly Preprocessor";
 String _version_major = "4";
 String _version_minor = "1";
 String _version_patch = "0";
-String _version_preRelease; // = "1"; //
+String _version_preRelease = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
 void setup(){

@@ -46,6 +46,7 @@ String cleanUnicode(String input){ // \\{0022} counts as more characters than it
 }
 
 String stripStr(String input){
+  if(input == null){ return null; }
   input = input.startsWith("\"") ? input.substring(1) : input; // strip leading and trailing "
   return input.endsWith("\"") ? input.substring(0, input.length()-1) : input;
 }
@@ -63,12 +64,17 @@ String[] splitVersion(String input){
   return tmp;
 }
 
-String compareVersions(String version, String action, String first, String second){
-  if(hyperVerboseOutput){ println("compareVersions: " + version + " " + action + " " + first + " " + second); }
+boolean compareVersions(String version, String action, String first, String second){
+  version = stripStr(version);
   action = stripStr(action);
   first = stripStr(first);
-  boolean cond = false;
-  boolean funcSet = false;
+  second = stripStr(second);
+  
+  if(hyperVerboseOutput){ println("compareVersions: " + version + " " + action + " " + first + " " + second); }
+  if(version == null){ appendOutput("\\!{compareVersions: version to check is required!"); return false; }
+  if(action == null){ appendOutput("\\!{compareVersions: action to try is required!"); return false; }
+  if(first == null){ appendOutput("\\!{compareVersions: version to check against is required!}"); return false; }
+  
   String[] v1 = splitVersion(first);
   
   String[] verArr = splitVersion(version);
@@ -88,25 +94,22 @@ String compareVersions(String version, String action, String first, String secon
   
   switch(action){
     case "!=": // not same
-      cond = !equ;
-      break;
+      return !equ;
     
     case "==": // same
-      cond = equ;
-      break;
+      return equ;
     
     case ">=": // greater than or equal
-      action = ">";
-      funcSet = true;
+      return equ || compareVersions(version, ">", first, null);
+    
     case "<=": // less than or equal
-      if(equ == true){ cond = true; break; }
-      if(funcSet == false){ action = "<"; }
+      return equ || compareVersions(version, "<", first, null);
+    
     case ">": // greater than
     case "<": // less than
       //println("checkVer: " + _VERSION + " " + args[1].Name + " " + args[2].Name);
       for(int i = 0; i < checkLength; i++){
         if(checkIf(verArr[i], action, v1[i], null, false)){
-          cond = true;
           break; // break out of loop
         }
         //println(_version[i] + " " + args[1].Name + " " + v1[i] + " = " + cond + " / " + equ);
@@ -117,43 +120,22 @@ String compareVersions(String version, String action, String first, String secon
     case "<=>": // between or equal
     case "<!>": // not between
     case "<>": // between
-      if(second == null){ return "\\!{check/compareVer: not enough args " + (args.length-1) + " is < 3/4}"; }
-      second = stripStr(second);
-      String[] v2 = splitVersion(stripStr(second));
-      checkLength = min(checkLength, v2.length);
-      
-      boolean[] equEach = new boolean[checkLength];
-      boolean eq2 = true;
-      for(int i = 0; i < checkLength; i++){
-        equEach[i] = v1[i].equals(verArr[i]) | v2[i].equals(verArr[i]);
-        eq2 &= equEach[i];
-      }
+      if(second == null){ appendOutput("\\!{compareVersions: checking between requires both min and max!}"); return false; }
       
       switch(action){ // ugly hack, but it works...
         case "<!=>": // not between or equal
-          if(equ == true || eq2 == true){ cond = false; break; }
-          action = "<!>";
-          funcSet = true;
+          return compareVersions(version, "<", first, null) || compareVersions(version, ">", second, null);
         case "<=>": // between or equal
-          if(funcSet == false){
-            if(equ == true || eq2 == true){ cond = true; break; }
-            action = "<>";
-          }
+          return compareVersions(version, ">=", first, null) && compareVersions(version, "<=", second, null);
         case "<!>": // not between
+          return compareVersions(version, "<=", first, null) || compareVersions(version, ">=", second, null);
         case "<>": // between
-          //println("checkVer: " + _VERSION + " " + args[1].Name + " " + args[2].Name + ", " + args[3].Name);
-          for(int i = 0; i < checkLength; i++){
-            if(equEach[i] == false && checkIf(verArr[i], action, v1[i], v2[i], false)){
-              cond = true;
-              break; // break out of loop
-            }
-          }
-          break;
+          return compareVersions(version, ">", first, null) && compareVersions(version, "<", second, null);
       }
-      break;
   }
   
-  return str(cond);
+  appendOutput("\\!{compareVersions: unknown action <" + action + ">!}");
+  return false;
 }
 
 String getLabelUUID(){
