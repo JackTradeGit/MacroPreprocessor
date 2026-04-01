@@ -1,3 +1,3 @@
-This folder contains various example code on how to use Assembly Preprocessor.
+This folder contains various example code on how to use Macro Preprocessor.
 
 Many of the examples will have a different licence than the main project, so watch out for that.

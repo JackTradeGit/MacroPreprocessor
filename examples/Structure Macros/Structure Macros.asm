@@ -1,5 +1,5 @@
 ; Originally made by Garth Wilson @ [https://wilsonminesco.com/StructureMacros/]
-; Ported to work with Assembly Preprocessor's odd syntax and eccentricities
+; Ported to work with Macro Preprocessor's odd syntax and eccentricities
 ; Contents of this file use a different licence as compared to the main project, specifically: CC BY-SA 4.0 -- [https://creativecommons.org/licenses/by-sa/4.0/]
 
 .let strucMacVer = "4.0.0"

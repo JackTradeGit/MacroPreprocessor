@@ -47,7 +47,7 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
       f64(1234.5678) 64 bit floating point number - Double (8 bytes)
 */
 
-String _program_name = "Assembly Preprocessor";
+String _program_name = "Macro Preprocessor";
 String _version_major = "4";
 String _version_minor = "1";
 String _version_patch = "1";
@@ -120,7 +120,7 @@ void setup(){
   }
   
   if(_exit){
-    println("Assembly Preprocessor " + _VERSION);
+    println(_program_name + " " + _VERSION);
     println();
     println("--help - Show this help text. Congratulations.");
     println();
