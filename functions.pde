@@ -6,7 +6,6 @@ String parseFunction(String input){
   if(hyperVerboseOutput){ print("parseFunction:args = ");printArray(args); }
   //VariableReturn[] argsInt = new VariableReturn[args.length];
   //printArray(args);
-  String output = "";
   
   //for(int i = 0; i < args.length; i++){
   //  argsInt[i] = tryInt(args[i]);
@@ -14,58 +13,50 @@ String parseFunction(String input){
   
   switch(args[0].Name){
     case "strLen":
-      output += cleanUnicode(args[1].Name).length();
-      break;
+      return str(cleanUnicode(args[1].Name).length());
     
     case "str":
-      output += "\"" + args[1].Name + "\"";
-      break;
+      return "\"" + args[1].Name + "\"";
     
     case "stripStr":
-      output = stripStr(args[1].Name); // strip leading and trailing "
-      break;
+      return stripStr(args[1].Name); // strip leading and trailing "
     
     case "random":
       Token min = tryInt(args[1].Name);
       Token max = tryInt(args[2].Name);
       if(min.Number == true && max.Number == true){
-        output += random(min.Integer, max.Integer);
+        return str(random(min.Integer, max.Integer));
       }else{
-        output += "\\!{random, min/max has NAN type}";
+        return "\\!{random, min/max has NAN type}";
       }
-      break;
     
     case "pow":
       Token base = tryInt(args[1].Name);
       Token exponent = tryInt(args[2].Name);
       if(base.Number == true && exponent.Number == true){
-        output += pow(base.Integer, exponent.Integer);
+        return str(pow(base.Integer, exponent.Integer));
       }else{
-        output += "\\!{pow, base/exponent has NAN type}";
+        return "\\!{pow, base/exponent has NAN type}";
       }
-      break;
     
     case "goto":
       setIndex(tryInt(args[1].Name).Integer);
-      break;
+      return "";
     
     case "toInt":
       min = tryInt(args[1].Name);
       if(min.Number == true){
-        output += str(min.Integer);
+        return str(min.Integer);
       }else{
-        output += "\\!{toInt, input has NAN type}";
+        return "\\!{toInt, input has NAN type}";
       }
-      break;
     
     case "uuid":
-      output = getLabelUUID();
-      break;
+      return getLabelUUID();
     
     case "label":
       updateVariable(args[1].Name, args[2].Name);
-      output = args[2].Name;
-      break;
+      return args[2].Name;
     
     case "arg": // get a macro arg by index
       //println("parseFunction:arg " + args[1].Name + " == " + CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name);
@@ -73,12 +64,11 @@ String parseFunction(String input){
       //printArray(CurrentMacroArgs);
       if(parseVariables(args[1].Name).Integer < CurrentMacroArgs.length){
         //println("[" + parseVariables(args[1].Name).Integer + "] = " + CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name);
-        output = CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name;
+        return CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name;
       }else{
         //println();
-        output = "\\!{parseFunction.arg: Index " + parseVariables(args[1].Name).Integer + " out of bounds for length " + CurrentMacroArgs.length + "}";
+        return "\\!{parseFunction.arg: Index " + parseVariables(args[1].Name).Integer + " out of bounds for length " + CurrentMacroArgs.length + "}";
       }
-      break;
     
     //case "args": // get multiple macro args by index using ruby syntax? [1..4,10..8] == [1,2,3,4,10,9,8]
       //break;
@@ -86,22 +76,20 @@ String parseFunction(String input){
     case "pushTmp": // save a global var to the stack and set it to a tmp value
       _TmpGlobalVars.put(args[1].Name,_Vars.get(args[1].Name));
       updateVariable(args[1].Name, args[2].Name);
-      break;
+      return "";
     
     case "popTmp": // pop a tmp var from the stack early
       updateVariable(args[1].Name, _TmpGlobalVars.get(args[1].Name));
       _TmpGlobalVars.remove(args[1].Name);
-      break;
+      return "";
     
     case "checkVer":
       if(args.length < 3){ return "\\!{checkVer: not enough args " + (args.length-1) + "is < 2}"; }
-      output = str(compareVersions(_VERSION, args[1].Name, args[2].Name, args.length > 3 ? args[3].Name : ""));
-      break;
+      return str(compareVersions(_VERSION, args[1].Name, args[2].Name, args.length > 3 ? args[3].Name : ""));
     
     case "compareVer":
       if(args.length < 4){ return "\\!{compareVer: not enough args " + (args.length-1) + "is < 3}"; }
-      output = str(compareVersions(args[1].Name, args[2].Name, args[3].Name, args.length > 4 ? args[4].Name : ""));
-      break;
+      return str(compareVersions(args[1].Name, args[2].Name, args[3].Name, args.length > 4 ? args[4].Name : ""));
     
     case "debug":
       print("debug output: ");//printArray(args);
@@ -109,13 +97,13 @@ String parseFunction(String input){
         print(parseVariables(args[i].Name).String);
       }
       println();
-      break;
+      return "";
     
     case "formatStr":
       // \#{formatStr, "this is a {0} that {1} to be {2}", string, needs, formatted}
       // \#{formatStr, "this is a {string} that {needs} to be {formatted}"}
       // may need to change how args[] is populated, so that we can know indices...
-      break;
+      return "\\!{parseFunction.formatStr: not currently implemented!}";
     
     case "eval": // \#{eval, "out = a * b", out, a=10, b=2.5}
       Algorithm algo = Compile.algorithm(stripStr(args[1].Name), false); // get algorithm to eval
@@ -123,16 +111,25 @@ String parseFunction(String input){
         algo.eval(args[i].Name, args[i].Value); // add each input variable to the algorithm
       }
       //a.showVariables();
-      output = str(algo.answer(args[2].Name).toInteger()); // get output variable from algorithm
-      break;
+      Object answer = algo.answer(args[2].Name);
+      
+      if (answer instanceof Boolean) 
+        return str(((Boolean) answer).booleanValue());
+      else if (answer instanceof Integer)
+        return str(((Integer) answer).intValue());
+      else if (answer instanceof Float)
+        return str(((Float) answer).floatValue());
+      //else if (answer instanceof Double)
+        //return str(((Double) value).doubleValue());
+      else
+        return "\\!{parseFunction.eval: result \"" + args[2].Name + "\" is of unknown type!}";
     
     case "expr": // \#{expr, "10 * 2.5"}
       Expression expr = Compile.expression(stripStr(args[1].Name), false); // get expression to eval
-      output = str(expr.answer().toInteger()); // get output from expression
-      break;
+      return str(expr.answer().toInteger()); // get output from expression
   }
   
-  return output;
+  return "\\!{parseFunction: unknown function \"" + args[0].Name + "\"}";
 }
 
 
