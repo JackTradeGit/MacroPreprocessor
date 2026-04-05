@@ -51,6 +51,24 @@ String stripStr(String input){
   return input.endsWith("\"") ? input.substring(0, input.length()-1) : input;
 }
 
+String lowerCase(String input){
+  if(input == null){ return null; }
+  return input.toLowerCase();
+}
+
+String answerToStr(String func, String name, Object answer){
+  if (answer instanceof Boolean) 
+    return str(((Boolean) answer).booleanValue());
+  else if (answer instanceof Integer)
+    return str(((Integer) answer).intValue());
+  else if (answer instanceof Float)
+    return str(((Float) answer).floatValue());
+  //else if (answer instanceof Double)
+    //return str(((Double) answer).doubleValue());
+  else
+    return "\\!{parseFunction." + func + ": " + name + " is of unknown type!}";
+}
+
 String[] splitVersion(String input){
   input = input.toLowerCase();
   input = input.startsWith("v") ? input.substring(1) : input; // strip leading 'V'

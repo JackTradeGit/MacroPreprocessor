@@ -111,22 +111,11 @@ String parseFunction(String input){
         algo.eval(args[i].Name, args[i].Value); // add each input variable to the algorithm
       }
       //a.showVariables();
-      Object answer = algo.answer(args[2].Name);
-      
-      if (answer instanceof Boolean) 
-        return str(((Boolean) answer).booleanValue());
-      else if (answer instanceof Integer)
-        return str(((Integer) answer).intValue());
-      else if (answer instanceof Float)
-        return str(((Float) answer).floatValue());
-      //else if (answer instanceof Double)
-        //return str(((Double) value).doubleValue());
-      else
-        return "\\!{parseFunction.eval: result \"" + args[2].Name + "\" is of unknown type!}";
+      return answerToStr("eval", args[2].Name, algo.answer(args[2].Name)); // return answer
     
     case "expr": // \#{expr, "10 * 2.5"}
       Expression expr = Compile.expression(stripStr(args[1].Name), false); // get expression to eval
-      return str(expr.answer().toInteger()); // get output from expression
+      return answerToStr("expr", "result", expr.answer()); // return answer
   }
   
   return "\\!{parseFunction: unknown function \"" + args[0].Name + "\"}";
