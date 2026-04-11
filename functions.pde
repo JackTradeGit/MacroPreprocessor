@@ -99,6 +99,10 @@ String parseFunction(String input){
       println();
       return "";
     
+    case "comment":
+      appendOutput("; " + stripStr(args[1].Name));
+      return "";
+    
     case "formatStr":
       // \#{formatStr, "this is a {0} that {1} to be {2}", string, needs, formatted}
       // \#{formatStr, "this is a {string} that {needs} to be {formatted}"}
@@ -474,6 +478,7 @@ String parseStackFunction(String input){
             }
             break;
           case "depth": output = "0"; break; // stack exists but has zero elements
+          case "createStack": output = "\\!{parseStackFunction:" + args[0].Name + ", \"" + sName + "\" already exists!}"; break; // stack already exists
           default: output = "\\!{parseStackFunction:" + args[0].Name + ".underflow, " + sName + "}"; break; // stack underflow error
         }
       }
