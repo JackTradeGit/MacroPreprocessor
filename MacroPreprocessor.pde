@@ -51,7 +51,7 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 String _program_name = "Macro Preprocessor";
 String _version_major = "4";
 String _version_minor = "5";
-String _version_patch = "0";
+String _version_patch = "1";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -128,6 +128,7 @@ void setup(){
     println("--input=<file.ext> - Specify the input file.");
     println("\tOutput filename will be <input-filename>.obj");
     println("\t#include's will be opened and concatenated into a single output file.");
+    exit();
   }else{
     if(_run == true){
       startProcess();
