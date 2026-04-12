@@ -30,6 +30,15 @@ String parseFunction(String input) throws Exception{
         return "\\!{random, min/max has NAN type}";
       }
     
+    case "randomInt":
+      min = tryInt(args[1].Name);
+      max = tryInt(args[2].Name);
+      if(min.Number == true && max.Number == true){
+        return str((int)random(min.Integer, max.Integer));
+      }else{
+        return "\\!{randomInt, min/max has NAN type}";
+      }
+    
     case "pow":
       Token base = tryInt(args[1].Name);
       Token exponent = tryInt(args[2].Name);
@@ -102,6 +111,9 @@ String parseFunction(String input) throws Exception{
     case "comment":
       appendOutput("; " + stripStr(args[1].Name));
       return "";
+    
+    case "backslash": // hacky way of being able to use backslash, 'cause otherwise cleanEscape() just outputs unicode...
+      return "\\";
     
     case "formatStr":
       // \#{formatStr, "this is a {0} that {1} to be {2}", string, needs, formatted}

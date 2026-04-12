@@ -19,6 +19,7 @@ boolean showLines = false; // show all lines, including 'eaten' ones
 boolean concatenateFiles = true; // combine all input files into one output file
 boolean hyperVerboseOutput = false; // will all the println's in the universe be printed? (might be an int in the future...)
 boolean initEmptyStacks = false; // will an uninintialized stack be created on push, or generate an error?
+boolean ignoreMacroRecreate = false; // will an overwritten macro output a warning?
 
 PathReturn CurrentDirectory; // current working directory for file includes...
 int CurrentInputIndex = 0;
@@ -49,7 +50,7 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "4";
-String _version_minor = "4";
+String _version_minor = "5";
 String _version_patch = "0";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
@@ -147,6 +148,7 @@ void startProcess(){
   updateVariable("__showLines", "false");
   updateVariable("__hyperVerboseOutput", "false");
   updateVariable("__initEmptyStacks", "false");
+  updateVariable("__ignoreMacroRecreate", "false");
   
   try{ // make every child function throw Exception?
     // CurrentWorker.getLine(-1); // gives an easy error...

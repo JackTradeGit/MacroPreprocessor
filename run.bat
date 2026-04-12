@@ -1,1 +1,1 @@
-processing-java.exe --sketch=%~dp0 --run --input=%1
+processing-java.exe --sketch=%~dp0 --run --input %*

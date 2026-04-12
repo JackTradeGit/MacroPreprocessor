@@ -1,4 +1,4 @@
-To use "Structure Macros.asm" in code to be processed by AsmProc, simply:
+To use "Structure Macros.asm" in code to be processed by Macro Preprocessor, simply:
 .include "Structure Macros.asm"
 
 From there, using predefined macros is quite simple:
