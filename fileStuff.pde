@@ -102,7 +102,7 @@ class FileHolder{
   }
 }
 
-void checkIncludeFile(){
+void checkIncludeFile() throws Exception{
   getNewFile(getFile().file, getNextToken(true).String);
 }
 
@@ -229,13 +229,14 @@ PathReturn splitFilepath(String file){
 }
 
 void getNewFile(PathReturn base, PathReturn file){
+  println("getNewFile: " + base.toString() + " : " + file.toString());
   if(CurrentWorker != null){ Workers.add(new Worker(CurrentWorker)); }
   else{ CurrentWorker = new Worker(); }
   CurrentWorker.loadFile(base, file);
   pushTmpVars();
 }
 
-void getNewFile(PathReturn base, String line){
+void getNewFile(PathReturn base, String line) throws Exception{
   getNewFile(base, splitFilepath(line.replace("\"", "")));
   setIndex(-1); // needs to be -1 due to a ++ at end of main loop
 }

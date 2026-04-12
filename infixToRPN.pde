@@ -17,9 +17,11 @@ void testRPN(){
   if(_Vars == null){ _Vars = new StringDict(); }
   println("input:" + testRPN_input);
   updateVariable("token_prec", "" + 1337);
-  String testRPN_output = lineToRPN(testRPN_input, 0); // converted output
-  println("output:" + testRPN_output);
-  printArray(_Vars);
+  try{
+    String testRPN_output = lineToRPN(testRPN_input, 0); // converted output
+    println("output:" + testRPN_output);
+    printArray(_Vars);
+  }catch(Exception e){}
 }
 
 int getPrecedenceRPN(String c){
@@ -105,7 +107,7 @@ class Stack{
   }
 }
 
-String lineToRPN(String line, int index){
+String lineToRPN(String line, int index) throws Exception{
   Stack stack = new Stack();
   int state = 0;
   String output = "";

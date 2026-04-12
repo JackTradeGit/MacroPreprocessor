@@ -1,13 +1,13 @@
-void doIf(int depth_){
+void doIf(int depth_) throws Exception{
   incIndex(); // skip the .if line
   processInput(depth_+1, checkIf(false) ? ParseState.If_True : ParseState.If_False);
 }
 
-ParseState checkElseIf(){
+ParseState checkElseIf() throws Exception{
   return checkIf(false) ? ParseState.If_True : ParseState.If_False;
 }
 
-ParseState checkCase(ParseState state){
+ParseState checkCase(ParseState state) throws Exception{
   Token token = getNextToken(true);
   if(checkIf(peekSwitchArg(), token.String, getNextToken(true).String, null, false)){
     return ParseState.Switch_Taken;
@@ -29,7 +29,7 @@ Worker popWorker(){
   return Workers.remove(Workers.size() - 1);
 }
 
-void doSwitch(int depth_){
+void doSwitch(int depth_) throws Exception{
   pushSwitchArg(getNextToken(true).String);
   incIndex();
   processInput(depth_+1, ParseState.Switch_Look);
@@ -50,7 +50,7 @@ String peekSwitchArg(){
   return "";
 }
 
-void doBegin(int depth_){
+void doBegin(int depth_) throws Exception{
   _begin_Args.add(new int[] {getIndex(), 0});
   incIndex();
   processInput(depth_+1, ParseState.Begin_Search);

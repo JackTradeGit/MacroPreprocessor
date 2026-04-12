@@ -10,7 +10,7 @@ enum ParseState{
   Begin_Loop,
 }
 
-void processInput(int depth_, ParseState state_){ // current depth of if statements for debuging
+void processInput(int depth_, ParseState state_) throws Exception{ // current depth of if statements for debuging
   ParseState state = state_; // state machines FTW!
   int curDepth = depth_;
   

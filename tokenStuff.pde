@@ -1,4 +1,4 @@
-Token getNextToken(boolean allowEscape){
+Token getNextToken(boolean allowEscape) throws Exception{
   if(hyperVerboseOutput){ println("getNextToken: \"" + CurrentLineInput + "\" @ [" + CurrentInputIndex + "]"); }
   String token = "";
   int state = 0;
@@ -117,7 +117,7 @@ Token getNextToken(boolean allowEscape){
   return new Token(token, CurrentInputIndex, false);
 }
 
-Token cleanEscape(String line, int index, boolean runFunction){
+Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
   //println("[" + line + "]{" + index + "}");
   if(line.length() > 0 && index < line.length() && line.charAt(index) == '\\'){ index++; } // eat the incoming '\\'
   

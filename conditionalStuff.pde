@@ -1,16 +1,17 @@
-boolean checkIf(boolean default_){
+boolean checkIf(boolean default_) throws Exception{
   return checkIf(getNextToken(true).String, getNextToken(true).String, getNextToken(true).String, getNextToken(true).String, default_);
 }
 
-boolean checkIf(String firstToken, String action, String secondToken, String thirdToken, boolean default_){
+boolean checkIf(String firstToken, String action, String secondToken, String thirdToken, boolean default_) throws Exception{
   Token firstVar = parseVariables(firstToken);
   Token secondVar = parseVariables(secondToken);
-  if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
   if(firstToken.equals("")){ return default_; } // || action.equals("") || secondToken.string.equals("")
   
   if(firstVar.Number == false || secondVar.Number == false){
+    if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
     switch(action){
       case "==":
+        // println("checkIf: " + firstToken + "(" + firstVar.String + ") ?=? " + secondVar.String);
         return firstVar.String.equals(secondVar.String); // check if strings are equal
       
       case "!=":
@@ -30,7 +31,8 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
   }else{
     int comp = Integer.compare(firstVar.Integer, secondVar.Integer);
     boolean invert = false;
-    if(thirdToken == null || thirdToken.equals("")){
+    if(thirdToken == null || thirdToken.equals("") || thirdToken.startsWith(";")){
+      if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
       switch(action){
         case "==": // same
           return comp == 0;
@@ -56,6 +58,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
       }
     }else{
       Token thirdVar = parseVariables(thirdToken);
+      if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")" + " [" + thirdToken + "](" + thirdVar + ")"); }
       switch(action){
         case "<!>": // not between
           invert = true;
@@ -85,7 +88,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
   }
 }
 
-boolean checkCase(){
+boolean checkCase() throws Exception{
   //VariableReturn switchValue = parseVariables(peekMacroArgs()[0]);
   int state = 0;
   StringList output = new StringList();

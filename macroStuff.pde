@@ -146,7 +146,7 @@ class Macro{ // MacroFile combined class? plus a pun...
   }
 }
 
-void buildMacro(){
+void buildMacro() throws Exception{
   //println("<buildMacro>");
   //println(line_);
   Token token = getNextToken(true);
@@ -181,7 +181,7 @@ void buildMacro(){
   decIndex(); // main loops ++ at end, so we have to -- to be on correct line for next main loop
 }
 
-MacroArg[] getMacroArgs(String line, int index){
+MacroArg[] getMacroArgs(String line, int index) throws Exception{
   if(hyperVerboseOutput){ println("getMacroArgs: " + line); }
   ArrayList<MacroArg> args = new ArrayList<MacroArg>();
   MacroArg tmp = new MacroArg();
@@ -314,7 +314,7 @@ MacroArg[] getMacroArgs(String line, int index){
   return output;
 }
 
-boolean checkMacros(String macro){
+boolean checkMacros(String macro) throws Exception{
   Macro tmp = Macros.get(macro);
   if(tmp != null){
     //println("checkMacro: " + macro);

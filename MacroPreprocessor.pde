@@ -49,7 +49,7 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "4";
-String _version_minor = "3";
+String _version_minor = "4";
 String _version_patch = "0";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
@@ -148,17 +148,14 @@ void startProcess(){
   updateVariable("__hyperVerboseOutput", "false");
   updateVariable("__initEmptyStacks", "false");
   
-  updateVariable("__ext_db", "\t#d8");
-  updateVariable("__ext_db_wrapStart", "((");
-  updateVariable("__ext_db_wrapEnd", ")`8)");
-  updateVariable("__ext_dw", "\t#d16");
-  updateVariable("__ext_dw_wrapStart", "((");
-  updateVariable("__ext_dw_wrapEnd", ")`16)");
-  updateVariable("__ext_drw", "\t#d16");
-  updateVariable("__ext_drw_wrapStart", "le((");
-  updateVariable("__ext_drw_wrapEnd", ")`16)");
-  
-  processInput(0, ParseState.Entry);
+  try{ // make every child function throw Exception?
+    // CurrentWorker.getLine(-1); // gives an easy error...
+    processInput(0, ParseState.Entry);
+  }catch(Exception e){ // allows for soft errors instead of hard ones...
+    println(char(0x1B) + "[31m"); // set red error text
+    println(e);
+    println(char(0x1B) + "[39m"); // reset color
+  }
   
   print("Stacks: "); printArray(Stacks);
   print("Variables: "); printArray(_Vars);
@@ -220,9 +217,17 @@ String getFileName(){
 
 void appendOutput(String line){
   if(showLines){ // possibly show where it came from, and then...
-    line += "\t\t\t\t; " + CurrentWorker.getOrigin() + getFileName() + " @ " + (getIndex()+1);
+    line += getTrace();
   }
   _output.append(line); // ...append it to the output.
+}
+
+String getTrace(){ // if we're in a macro, this needs to traverse up the file stack until it hits an actual file
+  //String out = getFileName() + " @ " + (getIndex()+1);
+  //if(CurrentWorker.Type == WorkerType.Macro){
+    
+  //}
+  return "\t\t\t\t; " + CurrentWorker.getOrigin() + getFileName() + " @ " + (getIndex()+1);
 }
 
 String getLastOutputLine(){

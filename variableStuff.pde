@@ -95,11 +95,11 @@ class Token{
   }
 }
 
-void parseLet(){
+void parseLet() throws Exception{
   parseLet(getNextToken(true).String, getNextToken(true).String, getNextToken(true).String);
 }
 
-void parseLet(String variable, String action, String secondToken){
+void parseLet(String variable, String action, String secondToken) throws Exception{
   //println("parseLet: [" + variable + "](" + parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0") + ") " + action + " [" + secondToken + "](" + parseVariables(_Vars.hasKey(secondToken) ? _Vars.get(secondToken) : "0") + ")");
   switch(action){
     case "++":
@@ -129,6 +129,7 @@ void parseLet(String variable, String action, String secondToken){
         break;
       
       case "=":
+        // println(".let " + variable + " = " + secondVar.String);
         updateVariable(variable, secondVar.String);
         break;
     }
@@ -199,7 +200,7 @@ int parseLet(int firstVar, String action, int secondVar){
 //String getGlobalVariable(String name, boolean checkMacroArgs);
 //String getMacroArgument(String name, boolean checkGlobalVars);
 
-String getVariable(String name, boolean global){
+String getVariable(String name, boolean global) throws Exception{
   //println("getVariable: " + name + ", " + global);
   //println(getIndex());
   if(global && _Vars != null && _Vars.hasKey(name)){
@@ -267,7 +268,7 @@ String getBuiltin(String name){
       using {} grabs attention better...
 */
 
-Token parseVariables(String line){ // going through entire line to convert remaining bits into final output
+Token parseVariables(String line) throws Exception{ // going through entire line to convert remaining bits into final output
   if(hyperVerboseOutput){ println("parseVariables: " + line); }
   if(line == null){ return null; } // new VariableReturn("");
   String value = "";

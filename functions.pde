@@ -1,6 +1,6 @@
 // built-in functions
 
-String parseFunction(String input){
+String parseFunction(String input) throws Exception{
   if(hyperVerboseOutput){ println("parseFunction: " + input); }
   MacroArg[] args = getMacroArgs(input, 0);
   if(hyperVerboseOutput){ print("parseFunction:args = ");printArray(args); }
@@ -128,7 +128,7 @@ String parseFunction(String input){
 
 // built-in functions
 
-String parseStackFunction(String input){
+String parseStackFunction(String input) throws Exception{
   if(hyperVerboseOutput){ println("parseStackFunction: " + input); }
   MacroArg[] args = getMacroArgs(input, 0);
   if(hyperVerboseOutput){ print("parseStackFunction:args = ");printArray(args); }
@@ -500,7 +500,7 @@ String parseStackFunction(String input){
   return output;
 }
 
-String parseFileFunction(String input){
+String parseFileFunction(String input) throws Exception{
   if(hyperVerboseOutput){ println("parseFileFunction: " + input); }
   MacroArg[] args = getMacroArgs(input, 0);
   if(hyperVerboseOutput){ print("parseFileFunction:args = ");printArray(args); }

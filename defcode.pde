@@ -87,7 +87,7 @@ String[] splitVersion(String input){
   return out;
 }
 
-boolean compareVersions(String version, String action, String first, String second){
+boolean compareVersions(String version, String action, String first, String second) throws Exception{
   version = stripStr(version);
   action = stripStr(action);
   first = stripStr(first);
@@ -97,6 +97,26 @@ boolean compareVersions(String version, String action, String first, String seco
   if(version == null){ appendOutput("\\!{compareVersions: version to check is required!"); return false; }
   if(action == null){ appendOutput("\\!{compareVersions: action to try is required!"); return false; }
   if(first == null){ appendOutput("\\!{compareVersions: version to check against is required!}"); return false; }
+  
+  if(second != null){
+    switch(action){
+      case "<!=>": // not between or equal
+        return compareVersions(version, "<", first, null) || compareVersions(version, ">", second, null);
+      
+      case "<=>": // between or equal
+        return compareVersions(version, ">=", first, null) && compareVersions(version, "<=", second, null);
+      
+      case "<!>": // not between
+        return compareVersions(version, "<=", first, null) || compareVersions(version, ">=", second, null);
+      
+      case "<>": // between
+        return compareVersions(version, ">", first, null) && compareVersions(version, "<", second, null);
+      
+      default:
+        appendOutput("; \\!{compareVersions: only min is required to use #check/compareVer, max is unnecessary.}");
+        break;
+    }
+  }
   
   String[] verArr = splitVersion(version);
   String[] v1 = splitVersion(first);
@@ -126,6 +146,13 @@ boolean compareVersions(String version, String action, String first, String seco
       if(cond == true){ return true; }
       action = "<";
       break;
+    
+    case "<!=>": // not between or equal
+    case "<=>": // between or equal
+    case "<!>": // not between
+    case "<>": // between
+      appendOutput("\\!{compareVersions: checking between requires both min and max!}");
+      return false;
   }
   
   cond = false;
@@ -148,26 +175,9 @@ boolean compareVersions(String version, String action, String first, String seco
         }
       }
       return cond;
-    
-    case "<!=>": // not between or equal
-    case "<=>": // between or equal
-    case "<!>": // not between
-    case "<>": // between
-      if(second == null){ appendOutput("\\!{compareVersions: checking between requires both min and max!}"); return false; }
-      
-      switch(action){ // ugly hack, but it works...
-        case "<!=>": // not between or equal
-          return compareVersions(version, "<", first, null) || compareVersions(version, ">", second, null);
-        case "<=>": // between or equal
-          return compareVersions(version, ">=", first, null) && compareVersions(version, "<=", second, null);
-        case "<!>": // not between
-          return compareVersions(version, "<=", first, null) || compareVersions(version, ">=", second, null);
-        case "<>": // between
-          return compareVersions(version, ">", first, null) && compareVersions(version, "<", second, null);
-      }
   }
   
-  appendOutput("\\!{compareVersions: unknown action <" + action + ">!}");
+  appendOutput("\\!{compareVersions: " + action + " is an unknown action!}");
   return false;
 }
 
@@ -209,7 +219,7 @@ String octalToHex(String input_){
   return hex(value,4);
 }
 
-void outputLine(boolean skip){
+void outputLine(boolean skip) throws Exception{
   if(skip == true){
     if(hyperVerboseOutput){ println("outputLine skipped: \"" + CurrentLineOutput + "\""); }
   }else{
@@ -269,7 +279,7 @@ String cleanComments(String line){
   return output;
 }
 
-void cleanMultilineComments(){
+void cleanMultilineComments() throws Exception{
   int depth = 0;
   for(; getIndex() < getFileLength(); incIndex()){
     CurrentLineInput = getLine();
@@ -314,7 +324,7 @@ void cleanMultilineComments(){
   }
 }
 
-Token tryInt(String in){
+Token tryInt(String in) throws Exception{
   String output = "";
   int state = 0;
   boolean valid = true;
