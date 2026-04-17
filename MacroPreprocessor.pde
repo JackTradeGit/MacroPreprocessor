@@ -20,6 +20,7 @@ boolean concatenateFiles = true; // combine all input files into one output file
 boolean hyperVerboseOutput = false; // will all the println's in the universe be printed? (might be an int in the future...)
 boolean initEmptyStacks = false; // will an uninintialized stack be created on push, or generate an error?
 boolean ignoreMacroRecreate = false; // will an overwritten macro output a warning?
+int minLogLevel = -1; // what's the minimum level of log that will be output? (-1 = all)
 
 PathReturn CurrentDirectory; // current working directory for file includes...
 int CurrentInputIndex = 0;
@@ -50,8 +51,8 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "4";
-String _version_minor = "5";
-String _version_patch = "1";
+String _version_minor = "6";
+String _version_patch = "0";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -155,9 +156,7 @@ void startProcess(){
     // CurrentWorker.getLine(-1); // gives an easy error...
     processInput(0, ParseState.Entry);
   }catch(Exception e){ // allows for soft errors instead of hard ones...
-    println(char(0x1B) + "[31m"); // set red error text
-    println(e);
-    println(char(0x1B) + "[39m"); // reset color
+    log(Log.Always, Log.Error, Log.Console, e.toString());
   }
   
   print("Stacks: "); printArray(Stacks);

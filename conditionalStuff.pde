@@ -25,7 +25,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
         }
       
       default:
-        appendOutput("\\!{checkIf.string.unknownOperator: " + action + "}");
+        log(Log.Always, Log.Error, Log.Output, "\\!{checkIf.string.unknownOperator: " + action + "}");
         return default_;
     }
   }else{
@@ -53,7 +53,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
           return comp <= 0;
         
         default:
-          appendOutput("\\!{checkCondition.twovar.unknownOperator: " + action + "}");
+          log(Log.Always, Log.Error, Log.Output, "\\!{checkCondition.twovar.unknownOperator: " + action + "}");
           return default_;
       }
     }else{
@@ -81,7 +81,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
           }
         
         default:
-          appendOutput("\\!{checkCondition.trivar.unknownOperator: " + action + "}");
+          log(Log.Always, Log.Error, Log.Output, "\\!{checkCondition.trivar.unknownOperator: " + action + "}");
           return default_;
       }
     }

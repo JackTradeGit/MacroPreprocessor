@@ -150,10 +150,20 @@ void updateVariable(String var_, String value_){
         switch(value_.toLowerCase()){
           case "true": valueBool = true; break;
           case "false": break;
-          default: return;
+          default:
+            Token tmp = null; // might want to do this at top of function, then switch on tmp.Type
+            try{ tmp = parseVariables(value_); }
+            catch(Exception e){ log(Log.Always, Log.Error, Log.Console, "How in the heck did you create an error while setting a variable!? " + e.toString()); }
+            
+            if(tmp != null && tmp.Number){
+              switch(var_){ // update numerical directive variables
+                case "__minLogLevel": minLogLevel = tmp.Integer; break;
+              }
+            }
+            return;
         }
         
-        switch(var_){ // update directive variables
+        switch(var_){ // update boolean directive variables
           case "__maintainComments": maintainComments = valueBool; break;
           case "__showLines": showLines = valueBool; break;
           case "__concatenateFiles": concatenateFiles = valueBool; break;
