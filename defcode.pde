@@ -94,9 +94,9 @@ boolean compareVersions(String version, String action, String first, String seco
   second = stripStr(second);
   
   if(hyperVerboseOutput){ println("compareVersions: " + version + " " + action + " " + first + " " + second); }
-  if(version == null){ log(Log.Always, Log.Error, Log.Output, "\\!{compareVersions: version to check is required!"); return false; }
-  if(action == null){ log(Log.Always, Log.Error, Log.Output, "\\!{compareVersions: action to try is required!"); return false; }
-  if(first == null){ log(Log.Always, Log.Error, Log.Output, "\\!{compareVersions: version to check against is required!}"); return false; }
+  if(version == null){ log(Log.Always, Log.Error, Log.Output, "compareVersions: version to check is required!"); return false; }
+  if(action == null){ log(Log.Always, Log.Error, Log.Output, "compareVersions: action to try is required!"); return false; }
+  if(first == null){ log(Log.Always, Log.Error, Log.Output, "compareVersions: version to check against is required!"); return false; }
   
   if(second != null){
     switch(action){
@@ -113,7 +113,7 @@ boolean compareVersions(String version, String action, String first, String seco
         return compareVersions(version, ">", first, null) && compareVersions(version, "<", second, null);
       
       default:
-        log(Log.Minimum, Log.Warning, Log.Output, "; \\!{compareVersions: only min is required to use #check/compareVer, max is unnecessary.}");
+        log(Log.Minimum, Log.Warning, Log.Output, "compareVersions: only min is required to use #check/compareVer, max is unnecessary.");
         break;
     }
   }
@@ -151,7 +151,7 @@ boolean compareVersions(String version, String action, String first, String seco
     case "<=>": // between or equal
     case "<!>": // not between
     case "<>": // between
-      log(Log.Always, Log.Error, Log.Output, "\\!{compareVersions: checking between requires both min and max!}");
+      log(Log.Always, Log.Error, Log.Output, "compareVersions: checking between requires both min and max!");
       return false;
   }
   
@@ -177,7 +177,7 @@ boolean compareVersions(String version, String action, String first, String seco
       return cond;
   }
   
-  log(Log.Always, Log.Error, Log.Output, "\\!{compareVersions: " + action + " is an unknown action!}");
+  log(Log.Always, Log.Error, Log.Output, "compareVersions: " + action + " is an unknown action!");
   return false;
 }
 

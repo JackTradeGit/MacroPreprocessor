@@ -167,7 +167,7 @@ void buildMacro() throws Exception{
     switch(token.String){
       case ".endm":
         //println("<endm>");
-        if(!ignoreMacroRecreate && Macros.containsKey(name)){ log(Log.Minimum, Log.Warning, Log.Output, "; \\!{buildMacro: \"" + name + "\" already exists and will be overwritten!}"); }
+        if(!ignoreMacroRecreate && Macros.containsKey(name)){ log(Log.Minimum, Log.Warning, Log.Output, "buildMacro: \"" + name + "\" already exists and will be overwritten!"); }
         Macros.put(name, new Macro(name, args, content.toArray(), lineNum.toArray(), getFileName(), originLine));
         state = -1;
         break;
