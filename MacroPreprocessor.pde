@@ -52,7 +52,7 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 String _program_name = "Macro Preprocessor";
 String _version_major = "4";
 String _version_minor = "6";
-String _version_patch = "1";
+String _version_patch = "2";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -151,6 +151,7 @@ void startProcess(){
   updateVariable("__hyperVerboseOutput", "false");
   updateVariable("__initEmptyStacks", "false");
   updateVariable("__ignoreMacroRecreate", "false");
+  updateVariable("__minLogLevel", "-1");
   
   try{ // make every child function throw Exception?
     // CurrentWorker.getLine(-1); // gives an easy error...
