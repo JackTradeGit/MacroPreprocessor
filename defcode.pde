@@ -93,7 +93,7 @@ boolean compareVersions(String version, String action, String first, String seco
   first = stripStr(first);
   second = stripStr(second);
   
-  if(hyperVerboseOutput){ println("compareVersions: " + version + " " + action + " " + first + " " + second); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "compareVersions: " + version + " " + action + " " + first + " " + second);
   if(version == null){ log(Log.Always, Log.Error, Log.Output, "compareVersions: version to check is required!"); return false; }
   if(action == null){ log(Log.Always, Log.Error, Log.Output, "compareVersions: action to try is required!"); return false; }
   if(first == null){ log(Log.Always, Log.Error, Log.Output, "compareVersions: version to check against is required!"); return false; }
@@ -221,7 +221,7 @@ String octalToHex(String input_){
 
 void outputLine(boolean skip) throws Exception{
   if(skip == true){
-    if(hyperVerboseOutput){ println("outputLine skipped: \"" + CurrentLineOutput + "\""); }
+    logVerbose(Log.Minimum, Log.Function, Log.Console, "outputLine skipped: \"" + CurrentLineOutput + "\"");
   }else{
     boolean empty = isLineEmpty(CurrentLineOutput);
     if(empty){ // the current line is blank...

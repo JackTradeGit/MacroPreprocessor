@@ -14,13 +14,16 @@ HashMap<String, StringList> Stacks = new HashMap<String, StringList>(); // hashm
 
 // How many changes, and how much effort, would it be to change _Vars, Stacks, and the other bits, to use Token's?
 
+// boolean directive variables
 boolean maintainComments = false; // should comments be passed on, or cleaned up
 boolean showLines = false; // show all lines, including 'eaten' ones
 boolean concatenateFiles = true; // combine all input files into one output file
-boolean hyperVerboseOutput = false; // will all the println's in the universe be printed? (might be an int in the future...)
 boolean initEmptyStacks = false; // will an uninintialized stack be created on push, or generate an error?
 boolean ignoreMacroRecreate = false; // will an overwritten macro output a warning?
-int minLogLevel = -1; // what's the minimum level of log that will be output? (-1 = all)
+
+// integer directive variables
+int hyperVerboseOutput = 0; // will all the println's in the universe be printed? (-1 = all, 0 = none)
+int minLogLevel = 0; // what's the minimum level of log that will be output? (-1 = all, 0 = none)
 
 PathReturn CurrentDirectory; // current working directory for file includes...
 int CurrentInputIndex = 0;
@@ -50,9 +53,9 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 */
 
 String _program_name = "Macro Preprocessor";
-String _version_major = "4";
-String _version_minor = "6";
-String _version_patch = "2";
+String _version_major = "5";
+String _version_minor = "0";
+String _version_patch = "0";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -145,13 +148,16 @@ void startProcess(){
   _output.append("; " + getLabelUUID());
   _output.append(""); _output.append("");
   
+  // boolean directive variables
   updateVariable("__concatenateFiles", "true");
   updateVariable("__maintainComments", "false");
   updateVariable("__showLines", "false");
-  updateVariable("__hyperVerboseOutput", "false");
   updateVariable("__initEmptyStacks", "false");
   updateVariable("__ignoreMacroRecreate", "false");
-  updateVariable("__minLogLevel", "-1");
+  
+  // integer directive variables
+  updateVariable("__hyperVerboseOutput", "0");
+  updateVariable("__minLogLevel", "0");
   
   try{ // make every child function throw Exception?
     // CurrentWorker.getLine(-1); // gives an easy error...

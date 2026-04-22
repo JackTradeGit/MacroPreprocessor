@@ -182,7 +182,7 @@ void buildMacro() throws Exception{
 }
 
 MacroArg[] getMacroArgs(String line, int index) throws Exception{
-  if(hyperVerboseOutput){ println("getMacroArgs: " + line); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "getMacroArgs: " + line);
   ArrayList<MacroArg> args = new ArrayList<MacroArg>();
   MacroArg tmp = new MacroArg();
   boolean isDefault = false;

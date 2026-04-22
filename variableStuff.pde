@@ -113,7 +113,7 @@ void parseLet(String variable, String action, String secondToken) throws Excepti
   
   Token firstVar = parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0");
   Token secondVar = parseVariables(secondToken);
-  if(hyperVerboseOutput){ println("parseLet: [" + variable + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseLet: [" + variable + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")");
   
   if(firstVar.Number && secondVar.Number){
     updateVariable(variable, str(parseLet(firstVar.Integer, action, secondVar.Integer)));
@@ -158,6 +158,7 @@ void updateVariable(String var_, String value_){
             if(tmp != null && tmp.Number){
               switch(var_){ // update numerical directive variables
                 case "__minLogLevel": minLogLevel = tmp.Integer; break;
+                case "__hyperVerboseOutput": hyperVerboseOutput = tmp.Integer; break;
               }
             }
             return;
@@ -167,7 +168,6 @@ void updateVariable(String var_, String value_){
           case "__maintainComments": maintainComments = valueBool; break;
           case "__showLines": showLines = valueBool; break;
           case "__concatenateFiles": concatenateFiles = valueBool; break;
-          case "__hyperVerboseOutput": hyperVerboseOutput = valueBool; break;
           case "__initEmptyStacks": initEmptyStacks = valueBool; break;
           case "__ignoreMacroRecreate": ignoreMacroRecreate = valueBool; break;
         }
@@ -280,7 +280,7 @@ String getBuiltin(String name){
 */
 
 Token parseVariables(String line) throws Exception{ // going through entire line to convert remaining bits into final output
-  if(hyperVerboseOutput){ println("parseVariables: " + line); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseVariables: " + line);
   if(line == null){ return null; } // new VariableReturn("");
   String value = "";
   
@@ -289,7 +289,7 @@ Token parseVariables(String line) throws Exception{ // going through entire line
     
     switch(c){
       case '\\':
-        if(hyperVerboseOutput){ println("parseVariables:cleanEscape"); }
+        logVerbose(Log.Minimum, Log.Function, Log.Console, "parseVariables:cleanEscape");
         Token output = cleanEscape(line, i, true);
         i = output.nextIndex;
         value += output.String;

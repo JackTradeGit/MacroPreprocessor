@@ -55,14 +55,26 @@ static class Log{
   final static String BB_White   = Escape + "[1;47m";
   final static String B_Reset    = Escape + "[49m";
   
+  final static LogType notAllowed = null;
+  
   final static LogType[] Warning = new LogType[]{new LogType(F_Yellow, F_Reset), new LogType("; \\!{", "}")}; // (yellow text, reset), (commented error)
   final static LogType[] Error = new LogType[]{new LogType(F_Red, F_Reset), new LogType("\\!{", "}")}; // (red text, reset), (error)
+  
+  final static LogType[] Function = new LogType[]{new LogType(F_Green, F_Reset), notAllowed}; // (red text, reset), (not allowed)
 }
   
 void log(int level, Log.LogType[] type, int outputMask, String msg){
   if(level != Log.Always && level < minLogLevel){ return; } // return if level is below min, but only if not -1...
   
    // log can be output to multiple locations...
-  if((outputMask & Log.Console) != 0){ println(type[Log.ConsoleIDX].prefix + msg + type[Log.ConsoleIDX].suffix); }
-  if((outputMask & Log.Output) != 0){ appendOutput(type[Log.OutputIDX].prefix + msg + type[Log.OutputIDX].suffix); }
+  if((outputMask & Log.Console) != 0 && type[Log.ConsoleIDX] != null){ println(type[Log.ConsoleIDX].prefix + msg + type[Log.ConsoleIDX].suffix); }
+  if((outputMask & Log.Output) != 0 && type[Log.OutputIDX] != null){ appendOutput(type[Log.OutputIDX].prefix + msg + type[Log.OutputIDX].suffix); }
+}
+  
+void logVerbose(int level, Log.LogType[] type, int outputMask, String msg){
+  if(level != Log.Always && level < hyperVerboseOutput){ return; } // return if level is below min, but only if not -1...
+  
+   // log can be output to multiple locations...
+  if((outputMask & Log.Console) != 0 && type[Log.ConsoleIDX] != null){ println(type[Log.ConsoleIDX].prefix + msg + type[Log.ConsoleIDX].suffix); }
+  if((outputMask & Log.Output) != 0 && type[Log.OutputIDX] != null){ appendOutput(type[Log.OutputIDX].prefix + msg + type[Log.OutputIDX].suffix); }
 }

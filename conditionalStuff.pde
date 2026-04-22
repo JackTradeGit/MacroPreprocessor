@@ -8,7 +8,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
   if(firstToken.equals("")){ return default_; } // || action.equals("") || secondToken.string.equals("")
   
   if(firstVar.Number == false || secondVar.Number == false){
-    if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
+    logVerbose(Log.Minimum, Log.Function, Log.Console, "checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")");
     switch(action){
       case "==":
         // println("checkIf: " + firstToken + "(" + firstVar.String + ") ?=? " + secondVar.String);
@@ -32,7 +32,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
     int comp = Integer.compare(firstVar.Integer, secondVar.Integer);
     boolean invert = false;
     if(thirdToken == null || thirdToken.equals("") || thirdToken.startsWith(";")){
-      if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")"); }
+      logVerbose(Log.Minimum, Log.Function, Log.Console, "checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")");
       switch(action){
         case "==": // same
           return comp == 0;
@@ -58,7 +58,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
       }
     }else{
       Token thirdVar = parseVariables(thirdToken);
-      if(hyperVerboseOutput){ println("checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")" + " [" + thirdToken + "](" + thirdVar + ")"); }
+      logVerbose(Log.Minimum, Log.Function, Log.Console, "checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")" + " [" + thirdToken + "](" + thirdVar + ")");
       switch(action){
         case "<!>": // not between
           invert = true;

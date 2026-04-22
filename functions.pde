@@ -1,9 +1,9 @@
 // built-in functions
 
 String parseFunction(String input) throws Exception{
-  if(hyperVerboseOutput){ println("parseFunction: " + input); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseFunction: " + input);
   MacroArg[] args = getMacroArgs(input, 0);
-  if(hyperVerboseOutput){ print("parseFunction:args = ");printArray(args); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseFunction:args = " + args.toString());
   //VariableReturn[] argsInt = new VariableReturn[args.length];
   //printArray(args);
   
@@ -121,12 +121,11 @@ String parseFunction(String input) throws Exception{
       // may need to change how args[] is populated, so that we can know indices...
       return "\\!{parseFunction.formatStr: not currently implemented!}";
     
-    case "eval": // \#{eval, "out = a * b", out, a=10, b=2.5}
+    case "eval": // used for QScript? or some other complex scripting engine?
+      return "\\!{parseFunction.eval: not currently implemented!}";
+    
+    case "algo": // \#{eval, "out = a * b", out}
       Algorithm algo = Compile.algorithm(stripStr(args[1].Name), false); // get algorithm to eval
-      for(int i = 3; i < args.length; i++){
-        algo.eval(args[i].Name, args[i].Value); // add each input variable to the algorithm
-      }
-      //a.showVariables();
       return answerToStr("eval", args[2].Name, algo.answer(args[2].Name)); // return answer
     
     case "expr": // \#{expr, "10 * 2.5"}
@@ -141,9 +140,9 @@ String parseFunction(String input) throws Exception{
 // built-in functions
 
 String parseStackFunction(String input) throws Exception{
-  if(hyperVerboseOutput){ println("parseStackFunction: " + input); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseStackFunction: " + input);
   MacroArg[] args = getMacroArgs(input, 0);
-  if(hyperVerboseOutput){ print("parseStackFunction:args = ");printArray(args); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseStackFunction:args = " + args.toString());
   //VariableReturn[] argsInt = new VariableReturn[args.length];
   //printArray(args);
   String output = "";
@@ -178,12 +177,12 @@ String parseStackFunction(String input) throws Exception{
           case "TOS":
           case "peek": // (TOS - TOS [TOS])
             output = g_PEEK(sName);
-            if(hyperVerboseOutput){ println("parseStackFunction.TOS: " + sName + " = " + output); }
+            logVerbose(Log.Minimum, Log.Function, Log.Console, "parseStackFunction.TOS: " + sName + " = " + output);
             break;
           
           case "NOS": // (NOS TOS - NOS TOS [NOS])
             output = g_PEEK(sName, 1);
-            if(hyperVerboseOutput){ println("parseStackFunction.NOS: " + sName + " = " + output); }
+            logVerbose(Log.Minimum, Log.Function, Log.Console, "parseStackFunction.NOS: " + sName + " = " + output);
             break;
           
           case "3RD": // (3RD NOS TOS - 3RD NOS TOS [3RD])
@@ -513,9 +512,9 @@ String parseStackFunction(String input) throws Exception{
 }
 
 String parseFileFunction(String input) throws Exception{
-  if(hyperVerboseOutput){ println("parseFileFunction: " + input); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseFileFunction: " + input);
   MacroArg[] args = getMacroArgs(input, 0);
-  if(hyperVerboseOutput){ print("parseFileFunction:args = ");printArray(args); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "parseFileFunction:args = " + args.toString());
   String output = "";
   
   switch(args[0].Name){

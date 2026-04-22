@@ -25,7 +25,7 @@ void processInput(int depth_, ParseState state_) throws Exception{ // current de
       continue;
     }
     boolean skip = true;
-    if(hyperVerboseOutput){ println("[" + getIndex() + "]{" + state.name() + "}<" + token.String + "> " + CurrentLineInput); }
+    logVerbose(Log.Minimum, Log.Function, Log.Console, "[" + getIndex() + "]{" + state.name() + "}<" + token.String + "> " + CurrentLineInput);
     
     switch(state){
       case Entry:

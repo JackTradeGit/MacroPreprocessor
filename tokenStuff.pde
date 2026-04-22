@@ -1,5 +1,5 @@
 Token getNextToken(boolean allowEscape) throws Exception{
-  if(hyperVerboseOutput){ println("getNextToken: \"" + CurrentLineInput + "\" @ [" + CurrentInputIndex + "]"); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "getNextToken: \"" + CurrentLineInput + "\" @ [" + CurrentInputIndex + "]");
   String token = "";
   int state = 0;
   boolean inString = false;
@@ -28,7 +28,7 @@ Token getNextToken(boolean allowEscape) throws Exception{
           
           case '\\':
             if(allowEscape == true){
-              if(hyperVerboseOutput){ println("getNextToken:0:cleanEscape"); }
+              logVerbose(Log.Minimum, Log.Function, Log.Console, "getNextToken:0:cleanEscape");
               gotString = true;
               Token output = cleanEscape(CurrentLineInput, CurrentInputIndex, false);
               CurrentInputIndex = output.nextIndex;
@@ -87,7 +87,7 @@ Token getNextToken(boolean allowEscape) throws Exception{
           
           case '\\': // escaped open-paren are still handled by cleanEscape() obviously...
             if(allowEscape == true){
-              if(hyperVerboseOutput){ println("getNextToken:1:cleanEscape"); }
+              logVerbose(Log.Minimum, Log.Function, Log.Console, "getNextToken:1:cleanEscape");
               gotString = true;
               Token output = cleanEscape(CurrentLineInput, CurrentInputIndex, false);
               CurrentInputIndex = output.nextIndex;
@@ -113,7 +113,7 @@ Token getNextToken(boolean allowEscape) throws Exception{
     CurrentInputIndex++;
   }
   
-  if(hyperVerboseOutput){ println("getNextToken:output = \"" + token + "\" @ [" + CurrentInputIndex + "]"); }
+  logVerbose(Log.Minimum, Log.Function, Log.Console, "getNextToken:output = \"" + token + "\" @ [" + CurrentInputIndex + "]");
   return new Token(token, CurrentInputIndex, false);
 }
 
@@ -300,7 +300,7 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
       token = getVariable(token, true); // don't check macro arguments
       break;
     case Function: // built-in function
-      if(hyperVerboseOutput){ println("cleanEscape:parseFunction = " + runFunction); }
+      logVerbose(Log.Minimum, Log.Function, Log.Console, "cleanEscape:parseFunction = " + runFunction);
       if(runFunction){ // for some reason (bad programming probably...) parseFunction is being called twice for every function
         token = parseFunction(token); // parse function
       }else{
@@ -308,7 +308,7 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
       }
       break;
     case StackFunction:
-      if(hyperVerboseOutput){ println("cleanEscape:parseStackFunction = " + runFunction); }
+      logVerbose(Log.Minimum, Log.Function, Log.Console, "cleanEscape:parseStackFunction = " + runFunction);
       if(runFunction){ // same issue as parseFunction!
         token = parseStackFunction(token);
       }else{
@@ -316,7 +316,7 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
       }
       break;
     case FileFunction:
-      if(hyperVerboseOutput){ println("cleanEscape:parseFileFunction = " + runFunction); }
+      logVerbose(Log.Minimum, Log.Function, Log.Console, "cleanEscape:parseFileFunction = " + runFunction);
       if(runFunction){ // same issue as parseFunction!
         token = parseFileFunction(token);
       }else{
