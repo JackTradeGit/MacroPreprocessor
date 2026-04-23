@@ -328,6 +328,7 @@ Token tryInt(String in) throws Exception{
   String output = "";
   int state = 0;
   boolean valid = true;
+  int type = -1; // -1 = no prefix, 0 = +, 1 = -, 2 = ~
   
   //perform self check on number overflow?
   //should work for any radix?
@@ -349,6 +350,10 @@ Token tryInt(String in) throws Exception{
           case ' ':
           case '\t':
             break;
+          
+          case '+': type = 0; break;
+          case '-': type = 1; break;
+          case '~': type = 2; break;
           
           default:
             output += c;
@@ -469,7 +474,14 @@ Token tryInt(String in) throws Exception{
   }
   
   if(valid){
-    return new Token(in, value);
+    switch(type){
+      default: // Positive || No Prefix
+        return new Token(in, value);
+      case 1: // Negative
+        return new Token(in, -value);
+      case 2: // Invert
+        return new Token(in, ~value);
+    }
   }
   else{ return new Token(in); }
 }

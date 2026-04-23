@@ -50,8 +50,10 @@ int getPrecedenceRPN(String c){
   return 0;
 }
 
-boolean vaildUnary(char c){
-  return c == '!' || c == '~' || c == '+' || c == '-';
+boolean validUnary(char c){
+  return c == '~' || // Unary Invert
+         c == '+' || // Unary Positive
+         c == '-';   // Unary Negative
 }
 
 class RPNToken{
@@ -169,7 +171,7 @@ String lineToRPN(String line, int index) throws Exception{
             }else{
               if(i+1 < line.length()){
                 char c2 = line.charAt(i+1);
-                if(vaildUnary(c) && isNumber(c2)){ // unary operation
+                if(validUnary(c) && isNumber(c2)){ // unary operation
                   output += c;
                   number += c;
                 }else{

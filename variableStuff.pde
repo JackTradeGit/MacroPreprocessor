@@ -179,31 +179,20 @@ void updateVariable(String var_, String value_){
 // TODO: would it make more sense for parseLet to handle int/float stuff and return a VariableReturn?
 int parseLet(int firstVar, String action, int secondVar){
   switch(action){
-    case "+=":
-      return firstVar + secondVar; // check if integers are equal
-    
-    case "-=":
-      return firstVar - secondVar;
-    
-    case "*=":
-      return firstVar * secondVar;
-    
-    case "/=":
-      return firstVar / secondVar;
-    
-    case "%=":
-      return firstVar % secondVar;
-    
-    case "&=":
-      return firstVar & secondVar;
-    
-    case "|=":
-      return firstVar | secondVar;
-    
-    case "^=":
-      return firstVar ^ secondVar;
-    
+    case "+=": return firstVar + secondVar; // Addition
+    case "-=": return firstVar - secondVar; // Subtraction
+    case "*=": return firstVar * secondVar; // Multiplication
+    case "/=": return firstVar / secondVar; // Division
+    case "%=": return firstVar % secondVar; // Modulo
+    case "&=": return firstVar & secondVar; // Bitwise AND
+    case "|=": return firstVar | secondVar; // Bitwise OR
+    case "^=": return firstVar ^ secondVar; // Bitwise XOR
+    case "<<=": return firstVar << secondVar; // Shift Left
+    case ">>=": return firstVar >> secondVar; // Arithmetic Shift Right (Maintain Sign Bit)
+    case ">>>=": return firstVar >>> secondVar; // Logical Shift Right (Zero Sign Bit)
+    case "=": return secondVar; // Assignment
     default:
+      log(Log.Always, Log.Error, Log.Output, "parseLet: " + action + " is an unknown action!");
       return secondVar;
   }
 }
