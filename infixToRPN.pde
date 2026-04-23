@@ -2,8 +2,9 @@
 // Pulled from an ancient project that I left in a ROUGH state...
 //takes infix (normal) notation and converts it to reverse polish notation using a stack
 //String testRPN_input = "((123 * (2 + 45) * (2.3 / 5) ^ 0.2 - 1) % 5 * (1 - 5) ^ \\&{token_prec} + \\#{random,10,50})";
-String testRPN_input = "((123 * (2 + 45) * (2.3 / 5) ^ 0.2 - 1) % 5 * (1 - 5) ** \\&{token_prec} + \\#{random,10,\\&{token_prec}})"; // infix notation to be converted
-// 123 2 45 + 2.3 5 / 0.2 ^ * * 1 - 5 1 5 - \\&{token_prec} ** * % \\#{random,10,50} +
+String testRPN_input = "((123 * (2 + 45) * (23 / 5) ^ 2 - 1) % (5 * (1 - -5)) ^ \\&{token_prec})"; // infix notation to be converted
+// 123 2 45 + * 23 5 / * 2 1 - ^ 5 1 5 - * % 1337 ^
+// == 1312
 
 // we only have to perform infix to RPN conversion for our own code (or for "\("), otherwise we can simply emit the unconverted line
 
@@ -26,29 +27,31 @@ void testRPN(){
 
 int getPrecedenceRPN(String c){
   switch(c){
-    case "+":
+    case "|": // Bitwise OR
       return 10;
     
-    case "-":
-      return 10;
-    
-    case "**":
+    case "^": // Bitwise XOR
       return 20;
     
-    case "*":
-      return 20;
-    
-    case "/":
-      return 20;
-    
-    case "%":
-      return 20;
-    
-    case "^":
+    case "&": // Bitwise AND
       return 30;
     
+    case "+": // Addition
+    case "-": // Subtraction
+      return 40;
+    
+    case "*": // Multiplication
+    case "/": // Division
+    case "%": // Modulo
+      return 50;
   }
+  
+  //println("getPrecedenceRPN.unknownToken: " + c);
   return 0;
+}
+
+boolean vaildUnary(char c){
+  return c == '!' || c == '~' || c == '+' || c == '-';
 }
 
 class RPNToken{
@@ -57,6 +60,11 @@ class RPNToken{
   
   RPNToken(String n, int p){
     indentifier = n;
+    precedence = p;
+  }
+  
+  RPNToken(char c, int p){
+    indentifier = "" + c;
     precedence = p;
   }
   
@@ -112,7 +120,10 @@ String lineToRPN(String line, int index) throws Exception{
   int state = 0;
   String output = "";
   String token = "";
+  String number = "";
   int parenDepth = 1; // we start with a depth of 1 due to entering on an escaped open-paren
+  
+  ArrayList<RPNToken> out = new ArrayList<RPNToken>();
   
   for(int i = index; i < line.length() && state != -1; i++){
     char c = line.charAt(i);
@@ -121,20 +132,23 @@ String lineToRPN(String line, int index) throws Exception{
       case 0:
         switch(c){
           case ' ':
+            if(number.length() > 0){ out.add(new RPNToken(number, 0)); number = ""; }
             if(output.charAt(output.length() - 1) != ' '){ output += " "; }
             break;
           
           case '(': // '(' temporarily resets the top of stack precedence
             parenDepth++;
-            stack.push(new RPNToken(""+c, -1));
+            stack.push(new RPNToken(c, -1));
             break;
           
           case ')':
+            if(number.length() > 0){ out.add(new RPNToken(number, 0)); number = ""; }
             parenDepth--;
             if(parenDepth == 0){ state = -1; }
             else{
               while(!stack.peek().indentifier.equals("(")){
                 if(output.charAt(output.length() - 1) != ' '){ output += " "; }
+                out.add(stack.peek());
                 output += stack.pop().indentifier;
               }
               stack.pop();
@@ -142,30 +156,34 @@ String lineToRPN(String line, int index) throws Exception{
             break;
           
           case '\\': // escaped values, like macro args, global variables, built-in functions, etc.
-            Token tmp = cleanEscape(line, i, false);
+            Token tmp = cleanEscape(line, i, true);
+            out.add(new RPNToken(tmp.String, 0));
             output += tmp.String;
             i = tmp.nextIndex;
             break; // may want to defer calculating anything within escaped values, unless they do their own infixToRPN work...
           
           default:
-            if(isNumber(c)){
+            if(isNumber(c) || c == '.'){
               output += c;
+              number += c;
             }else{
               if(i+1 < line.length()){
                 char c2 = line.charAt(i+1);
-                if((c == '-' || c == '+') && isNumber(c2)){ // unary negation or positive
+                if(vaildUnary(c) && isNumber(c2)){ // unary operation
                   output += c;
+                  number += c;
                 }else{
                   switch(c2){
                     case ' ': // single character operator
                       if(getPrecedenceRPN(""+c) > getPrecedenceRPN(stack.peek().indentifier)){
-                        stack.push(new RPNToken(""+c, -1));
+                        stack.push(new RPNToken(c, -1));
                       }else{
-                        while(getPrecedenceRPN(""+c) < getPrecedenceRPN(stack.peek().indentifier)){
+                        while(getPrecedenceRPN(""+c) <= getPrecedenceRPN(stack.peek().indentifier)){
                           if(output.charAt(output.length() - 1) != ' '){ output += " "; }
+                          out.add(stack.peek());
                           output += stack.pop().indentifier;
                         }
-                        stack.push(new RPNToken(""+c, -1));
+                        stack.push(new RPNToken(c, -1));
                       }
                       break;
                     
@@ -177,13 +195,14 @@ String lineToRPN(String line, int index) throws Exception{
                 }
               }else{
                 if(getPrecedenceRPN(""+c) > getPrecedenceRPN(stack.peek().indentifier)){
-                  stack.push(new RPNToken(""+c, -1));
+                  stack.push(new RPNToken(c, -1));
                 }else{
-                  while(getPrecedenceRPN(""+c) < getPrecedenceRPN(stack.peek().indentifier)){
+                  while(getPrecedenceRPN(""+c) <= getPrecedenceRPN(stack.peek().indentifier)){
                     if(output.charAt(output.length() - 1) != ' '){ output += " "; }
+                    out.add(stack.peek());
                     output += stack.pop().indentifier;
                   }
-                  stack.push(new RPNToken(""+c, -1));
+                  stack.push(new RPNToken(c, -1));
                 }
               }
             }
@@ -199,8 +218,9 @@ String lineToRPN(String line, int index) throws Exception{
               if(getPrecedenceRPN(token) > getPrecedenceRPN(stack.peek().indentifier)){
                 stack.push(new RPNToken(token, -1));
               }else{
-                while(getPrecedenceRPN(token) < getPrecedenceRPN(stack.peek().indentifier)){
+                while(getPrecedenceRPN(token) <= getPrecedenceRPN(stack.peek().indentifier)){
                   if(output.charAt(output.length() - 1) != ' '){ output += " "; }
+                  out.add(stack.peek());
                   output += stack.pop().indentifier;
                 }
                 stack.push(new RPNToken(token, -1));
@@ -209,6 +229,14 @@ String lineToRPN(String line, int index) throws Exception{
             token = "";
             state = 0;
             break;
+          
+          case '\\': // escaped values, like macro args, global variables, built-in functions, etc.
+            Token tmp = cleanEscape(line, i, false);
+            out.add(new RPNToken(tmp.String, 0));
+            output += tmp.String;
+            i = tmp.nextIndex;
+            break; // may want to defer calculating anything within escaped values, unless they do their own infixToRPN work...
+          
           default: // still more characters in the multi-character operator
             token += c;
             break;
@@ -222,5 +250,53 @@ String lineToRPN(String line, int index) throws Exception{
     output += " " + stack.pop().indentifier;
   }
   
+  printArray(out);
+  println("evalRPN: " + evalRPN(out));
   return output;
+}
+
+int evalRPN(ArrayList<RPNToken> rpn) throws Exception{
+  Stack stack = new Stack();
+  
+  for(int i = 0; i < rpn.size(); i++){
+    RPNToken tok = rpn.get(i);
+    if(tok.precedence == 0){
+      stack.push(tok);
+    }else{
+      Token var2 = tryInt(stack.pop().indentifier);
+      Token var1 = tryInt(stack.pop().indentifier);
+      switch(tok.indentifier){
+        case "|": // Bitwise OR
+          stack.push(new RPNToken(str(var1.Integer | var2.Integer), 0));
+          break;
+        
+        case "^": // Bitwise XOR
+          stack.push(new RPNToken(str(var1.Integer ^ var2.Integer), 0));
+          break;
+        
+        case "&": // Bitwise AND
+          stack.push(new RPNToken(str(var1.Integer & var2.Integer), 0));
+          break;
+        
+        case "+": // Addition
+          stack.push(new RPNToken(str(var1.Integer + var2.Integer), 0));
+          break;
+        case "-": // Subtraction
+          stack.push(new RPNToken(str(var1.Integer - var2.Integer), 0));
+          break;
+        
+        case "*": // Multiplication
+          stack.push(new RPNToken(str(var1.Integer * var2.Integer), 0));
+          break;
+        case "/": // Division
+          stack.push(new RPNToken(str(var1.Integer / var2.Integer), 0));
+          break;
+        case "%": // Modulo
+          stack.push(new RPNToken(str(var1.Integer % var2.Integer), 0));
+          break;
+      }
+    }
+  }
+  
+  return tryInt(stack.pop().indentifier).Integer;
 }

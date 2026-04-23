@@ -55,12 +55,12 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
 String _version_minor = "0";
-String _version_patch = "0";
+String _version_patch = "1";
 String _version_preRelease; // = "1"; //
 String _VERSION = "V" + _version_major + "." + _version_minor + "." + _version_patch + (_version_preRelease != null ? "-pr." + _version_preRelease : "");
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
 void setup(){
-  println(_VERSION);
+  println(_program_name + " " + _VERSION);
   println("sketchPath() = " + sketchPath());
   
   if(args != null){ // allows input from command line
@@ -139,6 +139,8 @@ void setup(){
       exit();
     }
   }
+  
+  //testRPN();
 }
 
 void startProcess(){
