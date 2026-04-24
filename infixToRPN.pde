@@ -2,7 +2,7 @@
 // Pulled from an ancient project that I left in a ROUGH state...
 //takes infix (normal) notation and converts it to reverse polish notation using a stack
 //String testRPN_input = "((123 * (2 + 45) * (2.3 / 5) ^ 0.2 - 1) % 5 * (1 - 5) ^ \\&{token_prec} + \\#{random,10,50})";
-String testRPN_input = "((123 * (2 + 45) * (23 / 5) ^ 2 - 1) % (5 * (1 - -5)) ^ \\&{token_prec})"; // infix notation to be converted
+String testRPN_input = "((123 * (2 + 45) * (23 / 5) ^ 2 - 1) % (5 * (1 - -5)) ^ ~\\&{token_prec})"; // infix notation to be converted
 // 123 2 45 + * 23 5 / * 2 1 - ^ 5 1 5 - * % 1337 ^
 // == 1312
 
@@ -159,6 +159,7 @@ String lineToRPN(String line, int index) throws Exception{
           
           case '\\': // escaped values, like macro args, global variables, built-in functions, etc.
             Token tmp = cleanEscape(line, i, true);
+            if(number.length() != 0){ tmp.String = number + tmp.String; number = ""; }
             out.add(new RPNToken(tmp.String, 0));
             output += tmp.String;
             i = tmp.nextIndex;
@@ -171,7 +172,7 @@ String lineToRPN(String line, int index) throws Exception{
             }else{
               if(i+1 < line.length()){
                 char c2 = line.charAt(i+1);
-                if(validUnary(c) && isNumber(c2)){ // unary operation
+                if(validUnary(c) && (isNumber(c2) || c2 == '\\')){ // unary operation
                   output += c;
                   number += c;
                 }else{
@@ -252,7 +253,7 @@ String lineToRPN(String line, int index) throws Exception{
     output += " " + stack.pop().indentifier;
   }
   
-  printArray(out);
+  print("out: ");printArray(out);
   println("evalRPN: " + evalRPN(out));
   return output;
 }

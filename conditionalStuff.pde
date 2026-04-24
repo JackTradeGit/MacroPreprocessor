@@ -29,7 +29,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
         return default_;
     }
   }else{
-    int comp = Integer.compare(firstVar.Integer, secondVar.Integer);
+    int comp = Integer.compare(firstVar.Integer, secondVar.Integer);//compare(firstVar, secondVar);//
     boolean invert = false;
     if(thirdToken == null || thirdToken.equals("") || thirdToken.startsWith(";")){
       logVerbose(Log.Minimum, Log.Function, Log.Console, "checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")");
@@ -66,7 +66,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
           if(thirdVar.Number != true){
             return default_; // NAN
           }else{
-            int comp2 = Integer.compare(firstVar.Integer, thirdVar.Integer);
+            int comp2 = Integer.compare(firstVar.Integer, thirdVar.Integer);//compare(firstVar, thirdVar);
             return (comp > 0 && comp2 < 0) ^ invert; // v2 < v1 < v3
           }
         
@@ -76,7 +76,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
           if(thirdVar.Number != true){
             return default_; // NAN
           }else{
-            int comp2 = Integer.compare(firstVar.Integer, thirdVar.Integer);
+            int comp2 = Integer.compare(firstVar.Integer, thirdVar.Integer);//compare(firstVar, thirdVar);
             return ((comp > 0 && comp2 < 0) || comp == 0 || comp2 == 0) ^ invert; // v2 <= v1 <= v3
           }
         
@@ -87,6 +87,40 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
     }
   }
 }
+
+//int compare(Token var1, Token var2){
+//  switch(var1.Type){
+//    case Integer:
+//      switch(var2.Type){
+//        case Integer:
+//          //println(var1.getNumber() + " I:I " + var2.getNumber() + " = " + Double.compare(var1.Integer, var2.Integer));
+//          return Double.compare(var1.Integer, var2.Integer);
+//        case Float:
+//          //println(var1.getNumber() + " I:F " + var2.getNumber() + " = " + Double.compare(var1.Integer, var2.Float));
+//          return Double.compare(var1.Integer, var2.Float);
+//        default:
+//          log(Log.Always, Log.Error, Log.ConOut, "compare.invalidType: var2 is of type \"" + var2.type() + "\"");
+//          return 0;
+//      }
+    
+//    case Float:
+//      switch(var2.Type){
+//        case Integer:
+//          //println(var1.getNumber() + " F:I " + var2.getNumber() + " = " + Double.compare(var1.Float, var2.Integer));
+//          return Double.compare(var1.Float, var2.Integer);
+//        case Float:
+//          //println(var1.getNumber() + " F:F " + var2.getNumber() + " = " + Double.compare(var1.Float, var2.Float));
+//          return Double.compare(var1.Float, var2.Float);
+//        default:
+//          log(Log.Always, Log.Error, Log.ConOut, "compare.invalidType: var2 is of type \"" + var2.type() + "\"");
+//          return 0;
+//      }
+    
+//    default:
+//      log(Log.Always, Log.Error, Log.ConOut, "compare.invalidType: var1 is of type \"" + var2.type() + "\"");
+//      return 0;
+//  }
+//}
 
 boolean checkCase() throws Exception{
   //VariableReturn switchValue = parseVariables(peekMacroArgs()[0]);

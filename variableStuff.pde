@@ -38,6 +38,13 @@ class Token{
     Type = TokenType.Integer;
   }
   
+  //Token(String s, float f){
+  //  String = s;
+  //  Float = f;
+  //  Number = true;
+  //  Type = TokenType.Float;
+  //}
+  
   Token(String s, int i, boolean n){
     String = s;
     if(n){
@@ -62,10 +69,93 @@ class Token{
   
   String getNumber(){
     switch(Type){
-      case Integer: return "" + Integer;
-      default: return "0";
+      case Integer: return str(Integer);
+      //case Float: return str(Float);
+      default:
+        log(Log.Always, Log.Error, Log.ConOut, "Token.getNumber: Token type \"" + type() + "\" is not a number");
+        return "0";
     }
   }
+  
+  //Token updateNumber(String action, Token secondVar){
+  //  if(!Number){ log(Log.Always, Log.Error, Log.Output, "Token.updateNumber: Token Var1 type \"" + type() + "\" is not a number"); return this; }
+  //  if(!secondVar.Number){ log(Log.Always, Log.Error, Log.Output, "Token.updateNumber: Token Var1 type \"" + secondVar.type() + "\" is not a number"); return this; }
+  //  if(Type == TokenType.Float || secondVar.Type == TokenType.Float){
+  //    switch(action){
+  //      case "&=": // Bitwise AND
+  //      case "|=": // Bitwise OR
+  //      case "^=": // Bitwise XOR
+  //      case "<<=": // Shift Left
+  //      case ">>=": // Arithmetic Shift Right (Maintain Sign Bit)
+  //      case ">>>=": // Logical Shift Right (Zero Sign Bit)
+  //        log(Log.Always, Log.Error, Log.Output, "Token.updateNumber: " + action + " is an invalid action for floats!");
+  //        return this;
+  //    }
+  //  }
+  //  switch(Type){
+  //    case Integer:
+  //      switch(secondVar.Type){
+  //        case Integer:
+  //          switch(action){
+  //            case "+=": Integer += secondVar.Integer; return this; // Addition
+  //            case "-=": Integer -= secondVar.Integer; return this; // Subtraction
+  //            case "*=": Integer *= secondVar.Integer; return this; // Multiplication
+  //            case "/=": Integer /= secondVar.Integer; return this; // Division
+  //            case "%=": Integer %= secondVar.Integer; return this; // Modulo
+  //            case "**": Integer = (int)pow(Integer, secondVar.Integer); return this; // Exponent
+  //            case "&=": Integer &= secondVar.Integer; return this; // Bitwise AND
+  //            case "|=": Integer |= secondVar.Integer; return this; // Bitwise OR
+  //            case "^=": Integer ^= secondVar.Integer; return this; // Bitwise XOR
+  //            case "<<=": Integer <<= secondVar.Integer; return this; // Shift Left
+  //            case ">>=": Integer >>= secondVar.Integer; return this; // Arithmetic Shift Right (Maintain Sign Bit)
+  //            case ">>>=": Integer >>>= secondVar.Integer; return this; // Logical Shift Right (Zero Sign Bit)
+  //            case "=": Integer = secondVar.Integer; return this; // Assignment
+  //          }
+          
+  //        case Float:
+  //          Type = TokenType.Float; // convert this Token to a float...
+  //          switch(action){
+  //            case "+=": Float = Integer + secondVar.Float; return this; // Addition
+  //            case "-=": Float = Integer - secondVar.Float; return this; // Subtraction
+  //            case "*=": Float = Integer * secondVar.Float; return this; // Multiplication
+  //            case "/=": Float = Integer / secondVar.Float; return this; // Division
+  //            case "%=": Float = Integer % secondVar.Float; return this; // Modulo
+  //            case "**": Float = pow(Integer, secondVar.Float); return this; // Exponent
+  //            case "=": Float = secondVar.Float; return this; // Assignment
+  //          }
+  //      }
+      
+  //    case Float:
+  //      switch(secondVar.Type){
+  //        case Integer:
+  //          switch(action){
+  //            case "+=": Float += secondVar.Integer; return this; // Addition
+  //            case "-=": Float -= secondVar.Integer; return this; // Subtraction
+  //            case "*=": Float *= secondVar.Integer; return this; // Multiplication
+  //            case "/=": Float /= secondVar.Integer; return this; // Division
+  //            case "%=": Float %= secondVar.Integer; return this; // Modulo
+  //            case "**": Float = pow(Float, secondVar.Integer); return this; // Exponent
+  //            case "=": // Assignment
+  //              Type = TokenType.Integer; // convert this Token to a integer...
+  //              Integer = secondVar.Integer;
+  //              return this;
+  //          }
+          
+  //        case Float:
+  //          switch(action){
+  //            case "+=": Float += secondVar.Float; return this; // Addition
+  //            case "-=": Float -= secondVar.Float; return this; // Subtraction
+  //            case "*=": Float *= secondVar.Float; return this; // Multiplication
+  //            case "/=": Float /= secondVar.Float; return this; // Division
+  //            case "%=": Float %= secondVar.Float; return this; // Modulo
+  //            case "**": Float = pow(Float, secondVar.Float); return this; // Exponent
+  //            case "=": Float = secondVar.Float; return this; // Assignment
+  //          }
+  //      }
+  //  }
+  //  log(Log.Always, Log.Error, Log.Output, "Token.updateNumber: " + action + " is an unknown action!");
+  //  return this;
+  //}
   
   String type(){
     return Type.name();
@@ -95,6 +185,10 @@ class Token{
   }
 }
 
+Token getNumberVarAsToken(String variable) throws Exception{
+  return parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0");
+}
+
 void parseLet() throws Exception{
   parseLet(getNextToken(true).String, getNextToken(true).String, getNextToken(true).String);
 }
@@ -103,20 +197,23 @@ void parseLet(String variable, String action, String secondToken) throws Excepti
   //println("parseLet: [" + variable + "](" + parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0") + ") " + action + " [" + secondToken + "](" + parseVariables(_Vars.hasKey(secondToken) ? _Vars.get(secondToken) : "0") + ")");
   switch(action){
     case "++":
-      updateVariable(variable, str(parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0").Integer + 1));
+      updateVariable(variable, str(getNumberVarAsToken(variable).Integer + 1));
+      //updateVariable(variable, getNumberVarAsToken(variable).updateNumber("+", new Token("1", 1)).getNumber());
       return;
     
     case "--":
-      updateVariable(variable, str(parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0").Integer - 1));
+      updateVariable(variable, str(getNumberVarAsToken(variable).Integer - 1));
+      //updateVariable(variable, getNumberVarAsToken(variable).updateNumber("-", new Token("1", 1)).getNumber());
       return;
   }
   
-  Token firstVar = parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0");
+  Token firstVar = getNumberVarAsToken(variable);
   Token secondVar = parseVariables(secondToken);
   logVerbose(Log.Minimum, Log.Function, Log.Console, "parseLet: [" + variable + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")");
   
   if(firstVar.Number && secondVar.Number){
     updateVariable(variable, str(parseLet(firstVar.Integer, action, secondVar.Integer)));
+    //updateVariable(variable, firstVar.updateNumber(action, secondVar).getNumber());
   }else{
     switch(action){
       case "+=":

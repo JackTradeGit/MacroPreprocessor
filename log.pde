@@ -13,6 +13,7 @@ static class Log{
   final static int ConsoleIDX = 0;
   final static int Output = 2;
   final static int OutputIDX = 1;
+  final static int ConOut = Console | Output;
   
   final static int Always = -1;
   final static int Minimum = 0;

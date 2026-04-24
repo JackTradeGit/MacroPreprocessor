@@ -328,6 +328,7 @@ Token tryInt(String in) throws Exception{
   String output = "";
   int state = 0;
   boolean valid = true;
+  //boolean isFloat = false;
   int type = -1; // -1 = no prefix, 0 = +, 1 = -, 2 = ~
   
   //perform self check on number overflow?
@@ -375,6 +376,12 @@ Token tryInt(String in) throws Exception{
           case 'o': // octal
             state = 4;
             break;
+          
+          //case '.': // float
+          //  output += "0.";
+          //  isFloat = true;
+          //  state = 5;
+          //  break;
           
           default: // decimal
             state = 5;
@@ -425,6 +432,9 @@ Token tryInt(String in) throws Exception{
         if(isNumber(c)){
           valid = true;
           output += c;
+        //}else if(c == '.'){
+          //output += c;
+          //isFloat = true;
         //}else if(c == ' ' || c == '\t'){
           //valid = true;
           //state = -1;
@@ -449,6 +459,7 @@ Token tryInt(String in) throws Exception{
   }
   
   int value = 0;
+  float valueF = 0;
   if(valid){
     switch(state){
       case 2: // hexadecimal
@@ -465,6 +476,8 @@ Token tryInt(String in) throws Exception{
       
       case 5: // decimal
         value = parseInt(output, 10);
+        //if(isFloat){ valueF = parseFloat(output, 10); }
+        //else{ value = parseInt(output, 10); }
         break;
       
       default: // if a line is just spaces or tabs...
@@ -477,8 +490,10 @@ Token tryInt(String in) throws Exception{
     switch(type){
       default: // Positive || No Prefix
         return new Token(in, value);
+        //return new Token(in, isFloat ? valueF : value);
       case 1: // Negative
         return new Token(in, -value);
+        //return new Token(in, isFloat ? -valueF : -value);
       case 2: // Invert
         return new Token(in, ~value);
     }
