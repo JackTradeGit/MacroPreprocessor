@@ -319,7 +319,7 @@ boolean checkMacros(String macro) throws Exception{
   if(tmp != null){
     //println("checkMacro: " + macro);
     //print("pushing macro args: ");printArray(CurrentMacroArgs);
-    MacroArgsStack.add(CurrentMacroArgs != null ? CurrentMacroArgs.clone() : null);
+    pushMacroArgs(CurrentMacroArgs);
     pushTmpVars();
     //println("setting macro args @ " + CurrentWorker.getOrigin() + getFileName() + " @ " + (getIndex()+1));
     CurrentMacroArgs = getMacroArgs(CurrentLineInput, CurrentInputIndex).clone();

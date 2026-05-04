@@ -16,7 +16,7 @@ ParseState checkCase(ParseState state) throws Exception{
 }
 
 void pushMacroArgs(MacroArg[] args){
-  MacroArgsStack.add(args.clone());
+  MacroArgsStack.add(args != null ? args.clone() : null);
 }
 
 MacroArg[] popMacroArgs(){
