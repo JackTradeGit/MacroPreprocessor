@@ -121,6 +121,30 @@ String parseFunction(String input) throws Exception{
       // may need to change how args[] is populated, so that we can know indices...
       return "\\!{parseFunction.formatStr: not currently implemented!}";
     
+    case "toUpperCase":
+      return args[1].Name.toUpperCase();
+    
+    case "toLowerCase":
+      return args[1].Name.toLowerCase();
+    
+    case "toDecimal":
+      //println("<toDecimal>");
+      Token tmp = tryInt(args[1].Name);
+      if(tmp.Number){
+        return str(tmp.Integer);
+      }else{
+        return "\\!{parseFunction.toDecimal: " + args[1].Name + " is not a number!}";
+      }
+    
+    case "toHex":
+      //println("<toDecimal>");
+      tmp = tryInt(args[1].Name);
+      if(tmp.Number){
+        return "0x" + hex(tmp.Integer,8);
+      }else{
+        return "\\!{parseFunction.toHex: " + args[1].Name + " is not a number!}";
+      }
+    
     case "eval": // used for QScript? or some other complex scripting engine?
       return "\\!{parseFunction.eval: not currently implemented!}";
     
@@ -187,6 +211,10 @@ String parseStackFunction(String input) throws Exception{
           
           case "3RD": // (3RD NOS TOS - 3RD NOS TOS [3RD])
             output = g_PEEK(sName, 2);
+            break;
+          
+          case "contains": // (... [value] - ... [true/false])
+            output = g_CONTAINS(sName, args[2].Name) ? "true" : "false";
             break;
           
           case "clear": // (3RD NOS TOS - )

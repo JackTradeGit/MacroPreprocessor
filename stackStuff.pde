@@ -121,6 +121,10 @@ String g_PLUCK(String name, int value){
   return tmp;
 }
 
+boolean g_CONTAINS(String name, String value){
+  return Stacks.get(name).hasValue(value);
+}
+
 void pushTmpVars(){
   _TmpGlobalVarsArr.add((HashMap<String, String>)_TmpGlobalVars.clone());
   

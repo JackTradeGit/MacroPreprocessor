@@ -69,6 +69,13 @@ String answerToStr(String func, String name, Object answer){
     return "\\!{parseFunction." + func + ": " + name + " is of unknown type!}";
 }
 
+String buildVersion(String maj, String min, String pat, String pre){
+  String version = "V" + maj + "." + min;
+  if(pat != null){ version += "." + pat; }
+  if(pre != null){ version += "-pr." + pre; }
+  return version;
+}
+
 String[] splitVersion(String input){
   input = input.toLowerCase();
   input = input.startsWith("v") ? input.substring(1) : input; // strip leading 'V'
@@ -331,6 +338,8 @@ Token tryInt(String in) throws Exception{
   //boolean isFloat = false;
   int type = -1; // -1 = no prefix, 0 = +, 1 = -, 2 = ~
   
+  //println("<tryInt: " + in + ">");
+  
   //perform self check on number overflow?
   //should work for any radix?
   //radix = 10;
@@ -341,6 +350,7 @@ Token tryInt(String in) throws Exception{
   char c = ' ';
   for(int i = 0; i < in.length(); i++){
     c = in.charAt(i);
+    //print(state + ":" + c);
     switch(state){
       case 0:
         switch(c){
@@ -393,7 +403,7 @@ Token tryInt(String in) throws Exception{
         if(isHex(c)){
           valid = true;
           output += c;
-        }if(c == ' ' || c == '\t'){
+        }else if(c == ' ' || c == '\t'){
           valid = true;
           state = -1;
         }else{
@@ -406,7 +416,7 @@ Token tryInt(String in) throws Exception{
         if(isBinary(c)){
           valid = true;
           output += c;
-        }if(c == ' ' || c == '\t'){
+        }else if(c == ' ' || c == '\t'){
           valid = true;
           state = -1;
         }else{
@@ -419,7 +429,7 @@ Token tryInt(String in) throws Exception{
         if(isOctal(c)){
           valid = true;
           output += c;
-        }if(c == ' ' || c == '\t'){
+        }else if(c == ' ' || c == '\t'){
           valid = true;
           state = -1;
         }else{
