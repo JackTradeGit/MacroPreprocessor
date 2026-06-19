@@ -12,6 +12,8 @@ HashMap<String, String> _TmpGlobalVars = new HashMap<String, String>(); // ditto
 ArrayList<HashMap<String, String>> _TmpGlobalVarsArr = new ArrayList<HashMap<String, String>>(); // ditto, but a way to easily save and restore global variables
 HashMap<String, StringList> Stacks = new HashMap<String, StringList>(); // hashmap of data stacks for use in complex preprocessing
 
+StringList processedFiles = new StringList();
+
 // How many changes, and how much effort, would it be to change _Vars, Stacks, and the other bits, to use Token's?
 
 // boolean directive variables
@@ -76,6 +78,7 @@ void setup(){
             CurrentDirectory = filename;
             println(" " + filename + " [" + filename.Reverse + "]");
             _outputFile = filename.getPath() + filename.Name + ".obj";
+            println("--input Arg: Loading " + splitFilepath(sketchPath()), filename);
             getNewFile(splitFilepath(sketchPath()), filename);
             _exit = false;
             _run = true;
@@ -110,6 +113,7 @@ void setup(){
   }else{
     File mainAsm = new File(sketchPath("main.asm")); // if run from the IDE, we'll either auto run a "main.asm" in the root dir...
     if(mainAsm.exists()){
+      println("Main.asm Default: Loading main.asm");
       PathReturn filename = splitFilepath("main.asm");
       CurrentDirectory = filename;
       println(" " + filename + " [" + filename.Reverse + "]");
@@ -188,6 +192,7 @@ void fileSelected(File selection){
     CurrentDirectory = filename;
     println(" " + filename + " [" + filename.Reverse + "]");
     _outputFile = new File(selection.getParent(), filename.Name + ".obj").toString();
+    println("File Selected: Loading " + splitFilepath(selection.getParent()), filename);
     getNewFile(splitFilepath(selection.getParent()), filename);
     startProcess();
     exit();

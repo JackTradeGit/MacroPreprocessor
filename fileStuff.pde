@@ -228,17 +228,29 @@ PathReturn splitFilepath(String file){
   return output;
 }
 
-void getNewFile(PathReturn base, PathReturn file){
-  println("getNewFile: " + base.toString() + " : " + file.toString());
+boolean getNewFile(PathReturn base, PathReturn file){
+  //println("getNewFile: " + base.toString() + " : " + file.toString());
   if(CurrentWorker != null){ Workers.add(new Worker(CurrentWorker)); }
   else{ CurrentWorker = new Worker(); }
+  //println(CurrentWorker.LineIndex);
   CurrentWorker.loadFile(base, file);
+  if(CurrentWorker.getLine(0).equals(".once")){ // TODO: figure out how to make this not have to be on first line...
+    //println("File had .once as first line!");
+    //println("File is: " + CurrentWorker.File.file.toString());
+    if(processedFiles.hasValue(CurrentWorker.File.file.toString())){
+      //println("And it was already in the queue!");
+      CurrentWorker = new Worker(popWorker());
+      return false;
+    }
+  }
+  processedFiles.append(CurrentWorker.File.file.toString());
   pushTmpVars();
+  return true;
 }
 
 void getNewFile(PathReturn base, String line) throws Exception{
-  getNewFile(base, splitFilepath(line.replace("\"", "")));
-  setIndex(-1); // needs to be -1 due to a ++ at end of main loop
+  boolean loaded = getNewFile(base, splitFilepath(line.replace("\"", "")));
+  if(loaded){ setIndex(-1); } // needs to be -1 due to a ++ at end of main loop
 }
 
 void popFileIfLastLine(){

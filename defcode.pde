@@ -473,15 +473,19 @@ Token tryInt(String in) throws Exception{
   if(valid){
     switch(state){
       case 2: // hexadecimal
-        value = parseInt(output, 16);
+        //value = parseInt(output, 16);
+        value = parseHex(output);
+        //println(output + ":" + value);
         break;
       
       case 3: // binary
-        value = parseInt(output, 2);
+        //value = parseInt(output, 2);
+        value = parseBin(output);
         break;
       
       case 4: // octal
-        value = parseInt(output, 8);
+        //value = parseInt(output, 8);
+        value = parseOct(output);
         break;
       
       case 5: // decimal
@@ -509,4 +513,45 @@ Token tryInt(String in) throws Exception{
     }
   }
   else{ return new Token(in); }
+}
+
+int parseHex(String input){
+  input = input.toUpperCase();
+  int output = 0;
+  
+  for(int i = 0; i < input.length(); i++){
+    char c = input.charAt(i);
+    
+    output <<= 4;
+    if(c >= '0' && c <= '9'){ output |= c - '0'; }
+    else if(c >= 'A' && c <= 'F'){ output |= c - ('0' + 7); }
+  }
+  
+  return output;
+}
+
+int parseBin(String input){
+  int output = 0;
+  
+  for(int i = 0; i < input.length(); i++){
+    char c = input.charAt(i);
+    
+    output <<= 1;
+    if(c >= '0' && c <= '1'){ output |= c - '0'; }
+  }
+  
+  return output;
+}
+
+int parseOct(String input){
+  int output = 0;
+  
+  for(int i = 0; i < input.length(); i++){
+    char c = input.charAt(i);
+    
+    output <<= 1;
+    if(c >= '0' && c <= '7'){ output |= c - '0'; }
+  }
+  
+  return output;
 }

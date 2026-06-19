@@ -19,10 +19,14 @@ void processInput(int depth_, ParseState state_) throws Exception{ // current de
     CurrentLineOutput = CurrentLineInput;
     CurrentInputIndex = 0;
     Token token = getNextToken(false);
-    if(token.String.length() > 0 && token.String.charAt(0) == ';'){ // skip comment-only lines
-      if(maintainComments){ _output.append(CurrentLineInput); }
-      popFileIfLastLine();
-      continue;
+    if(token.String.length() > 0){
+      if(token.String.charAt(0) == ';'){ // skip comment-only lines
+        if(maintainComments){ _output.append(CurrentLineInput); }
+        popFileIfLastLine();
+        continue;
+      }else if(token.String.equals(".once")){ // skip .once lines
+        continue;
+      }
     }
     boolean skip = true;
     logVerbose(Log.Minimum, Log.Function, Log.Console, "[" + getIndex() + "]{" + state.name() + "}<" + token.String + "> " + CurrentLineInput);
