@@ -71,12 +71,12 @@ String parseFunction(String input) throws Exception{
       //println("parseFunction:arg " + args[1].Name + " == " + CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name);
       //print("parseFunction:arg ");
       //printArray(CurrentMacroArgs);
-      if(parseVariables(args[1].Name).Integer < CurrentMacroArgs.length){
+      if(parseVariables(args[1].Name, true).Integer < CurrentMacroArgs.length){
         //println("[" + parseVariables(args[1].Name).Integer + "] = " + CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name);
-        return CurrentMacroArgs[parseVariables(args[1].Name).Integer].Name;
+        return CurrentMacroArgs[parseVariables(args[1].Name, true).Integer].Name;
       }else{
         //println();
-        return "\\!{parseFunction.arg: Index " + parseVariables(args[1].Name).Integer + " out of bounds for length " + CurrentMacroArgs.length + "}";
+        return "\\!{parseFunction.arg: Index " + parseVariables(args[1].Name, true).Integer + " out of bounds for length " + CurrentMacroArgs.length + "}";
       }
     
     //case "args": // get multiple macro args by index using ruby syntax? [1..4,10..8] == [1,2,3,4,10,9,8]
@@ -103,7 +103,7 @@ String parseFunction(String input) throws Exception{
     case "debug":
       print("debug output: ");//printArray(args);
       for(int i = 1; i < args.length; i++){
-        print(parseVariables(args[i].Name).String);
+        print(parseVariables(args[i].Name, true).String);
       }
       println();
       return "";
@@ -234,7 +234,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pick": // (v1 v2 v3 #2 - v1 v2 v3 v1) [TOS=0, NOS=1, ...]
-            idx = parseVariables(g_POP(sName)).Integer;
+            idx = parseVariables(g_POP(sName), true).Integer;
             len = g_DEPTH(sName);
             if(len > idx){
               g_PUSH(sName, g_PEEK(sName, idx));
@@ -244,7 +244,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pickF": // (v1 v2 v3 [#2] - v1 v2 v3 v1) [TOS=0, NOS=1, ...]
-            idx = parseVariables(args[2].Name).Integer;
+            idx = parseVariables(args[2].Name, true).Integer;
             if(len > idx){
               g_PUSH(sName, g_PEEK(sName, idx));
             }else{
@@ -253,7 +253,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pickO": // (v1 v2 v3 #2 - v1 v2 v3 [v1]) [TOS=0, NOS=1, ...]
-            idx = parseVariables(g_POP(sName)).Integer;
+            idx = parseVariables(g_POP(sName), true).Integer;
             len = g_DEPTH(sName);
             if(len > idx){
               output = g_PEEK(sName, idx);
@@ -263,7 +263,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pickFO": // (v1 v2 v3 [#2] - v1 v2 v3 [v1]) [TOS=0, NOS=1, ...]
-            idx = parseVariables(args[2].Name).Integer;
+            idx = parseVariables(args[2].Name, true).Integer;
             if(len > idx){
               output = g_PEEK(sName, idx);
             }else{
@@ -272,7 +272,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pluck": // (v1 v2 v3 #2 - v2 v3 v1) [TOS=0, NOS=1, ...]
-            idx = parseVariables(g_POP(sName)).Integer;
+            idx = parseVariables(g_POP(sName), true).Integer;
             len = g_DEPTH(sName);
             if(len > idx){
               g_PUSH(sName, g_PLUCK(sName, idx));
@@ -282,7 +282,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pluckF": // (v1 v2 v3 [#2] - v2 v3 v1) [TOS=0, NOS=1, ...]
-            idx = parseVariables(args[2].Name).Integer;
+            idx = parseVariables(args[2].Name, true).Integer;
             if(len > idx){
               g_PUSH(sName, g_PLUCK(sName, idx));
             }else{
@@ -291,7 +291,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pluckO": // (v1 v2 v3 #2 - v2 v3 [v1]) [TOS=0, NOS=1, ...]
-            idx = parseVariables(g_POP(sName)).Integer;
+            idx = parseVariables(g_POP(sName), true).Integer;
             len = g_DEPTH(sName);
             if(len > idx){
               output = g_PLUCK(sName, idx);
@@ -301,7 +301,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pluckFO": // (v1 v2 v3 [#2] - v2 v3 [v1]) [TOS=0, NOS=1, ...]
-            idx = parseVariables(args[2].Name).Integer;
+            idx = parseVariables(args[2].Name, true).Integer;
             if(len > idx){
               output = g_PLUCK(sName, idx);
             }else{
@@ -310,7 +310,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "poke": // (v1 v2 v3 v4 #1 - v1 v4 v3) [TOS=0, NOS=1, ...]
-            idx = parseVariables(g_POP(sName)).Integer;
+            idx = parseVariables(g_POP(sName), true).Integer;
             len = g_DEPTH(sName);
             if(len > 0){
               tmp1 = g_POP(sName);
@@ -324,7 +324,7 @@ String parseStackFunction(String input) throws Exception{
             break;
           
           case "pokeF": // (v1 v2 v3 [v4 #1] - v1 v4 v3) [TOS=0, NOS=1, ...]
-            idx = parseVariables(args[2].Name).Integer;
+            idx = parseVariables(args[2].Name, true).Integer;
             if(len > idx){
               g_POKE(sName, args[3].Name, idx);
             }else{
@@ -489,7 +489,7 @@ String parseStackFunction(String input) throws Exception{
           
           case "1+": // (v1 - v1)
             if(len >= 1){
-              g_POKE(sName, str(parseVariables(g_PEEK(sName)).Integer + 1), 0);
+              g_POKE(sName, str(parseVariables(g_PEEK(sName), true).Integer + 1), 0);
             }else{
               output = "\\!{parseStackFunction:1+.underflow, " + sName + "}";
             }
@@ -497,7 +497,7 @@ String parseStackFunction(String input) throws Exception{
           
           case "1-": // (v1 - v1)
             if(len >= 1){
-              g_POKE(sName, str(parseVariables(g_PEEK(sName)).Integer - 1), 0);
+              g_POKE(sName, str(parseVariables(g_PEEK(sName), true).Integer - 1), 0);
             }else{
               output = "\\!{parseStackFunction:1-.underflow, " + sName + "}";
             }

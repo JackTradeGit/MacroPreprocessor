@@ -186,7 +186,7 @@ class Token{
 }
 
 Token getNumberVarAsToken(String variable) throws Exception{
-  return parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "0");
+  return parseVariables(_Vars.hasKey(variable) ? _Vars.get(variable) : "", true);
 }
 
 void parseLet() throws Exception{
@@ -208,7 +208,7 @@ void parseLet(String variable, String action, String secondToken) throws Excepti
   }
   
   Token firstVar = getNumberVarAsToken(variable);
-  Token secondVar = parseVariables(secondToken);
+  Token secondVar = parseVariables(secondToken, true);
   logVerbose(Log.Minimum, Log.Function, Log.Console, "parseLet: [" + variable + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")");
   
   if(firstVar.Number && secondVar.Number){
@@ -227,7 +227,7 @@ void parseLet(String variable, String action, String secondToken) throws Excepti
       
       case "=":
         // println(".let " + variable + " = " + secondVar.String);
-        updateVariable(variable, secondVar.String);
+        updateVariable(variable, parseVariables(secondToken, false).String);
         break;
     }
   }
@@ -249,7 +249,7 @@ void updateVariable(String var_, String value_){
           case "false": break;
           default:
             Token tmp = null; // might want to do this at top of function, then switch on tmp.Type
-            try{ tmp = parseVariables(value_); }
+            try{ tmp = parseVariables(value_, true); }
             catch(Exception e){ log(Log.Always, Log.Error, Log.Console, "How in the heck did you create an error while setting a variable!? " + e.toString()); }
             
             if(tmp != null && tmp.Number){
@@ -321,7 +321,7 @@ String getVariable(String name, boolean global) throws Exception{
             if(curMacro[a].Value != null){ return curMacro[a].Value; }
             else{ return "\\!{macro arg '" + name + "' does not have a default value!}"; }
           }else{
-            return parseVariables(lineMacroArgs[a].Name).toString();
+            return parseVariables(lineMacroArgs[a].Name, true).toString();
           }
         }
       }
@@ -365,7 +365,7 @@ String getBuiltin(String name){
       using {} grabs attention better...
 */
 
-Token parseVariables(String line) throws Exception{ // going through entire line to convert remaining bits into final output
+Token parseVariables(String line, boolean parseNum) throws Exception{ // going through entire line to convert remaining bits into final output
   logVerbose(Log.Minimum, Log.Function, Log.Console, "parseVariables: " + line);
   if(line == null){ return null; } // new VariableReturn("");
   String value = "";
@@ -387,7 +387,7 @@ Token parseVariables(String line) throws Exception{ // going through entire line
     }
   }
   
-  if(value.length() > 0){
+  if(parseNum && value.length() > 0){ // TODO: figure out how to 'pass through' hex values and the like to output file!
     Token tmp = tryInt(value);
     if(tmp.Number){ return tmp; }
   }

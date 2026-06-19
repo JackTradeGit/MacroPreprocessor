@@ -3,8 +3,8 @@ boolean checkIf(boolean default_) throws Exception{
 }
 
 boolean checkIf(String firstToken, String action, String secondToken, String thirdToken, boolean default_) throws Exception{
-  Token firstVar = parseVariables(firstToken);
-  Token secondVar = parseVariables(secondToken);
+  Token firstVar = parseVariables(firstToken, true);
+  Token secondVar = parseVariables(secondToken, true);
   if(firstToken.equals("")){ return default_; } // || action.equals("") || secondToken.string.equals("")
   
   if(firstVar.Number == false || secondVar.Number == false){
@@ -57,7 +57,7 @@ boolean checkIf(String firstToken, String action, String secondToken, String thi
           return default_;
       }
     }else{
-      Token thirdVar = parseVariables(thirdToken);
+      Token thirdVar = parseVariables(thirdToken, true);
       logVerbose(Log.Minimum, Log.Function, Log.Console, "checkIf: [" + firstToken + "](" + firstVar + ") " + action + " [" + secondToken + "](" + secondVar + ")" + " [" + thirdToken + "](" + thirdVar + ")");
       switch(action){
         case "<!>": // not between
