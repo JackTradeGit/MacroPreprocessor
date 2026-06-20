@@ -57,7 +57,7 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
 String _version_minor = "2";
-String _version_patch = "1";
+String _version_patch = "2";
 String _version_preRelease; // = "1"
 String _VERSION = buildVersion(_version_major, _version_minor, _version_patch, _version_preRelease);
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -106,6 +106,33 @@ void setup(){
           _run = false;
           break;
         
+        case "--self-test":
+          if(i == args.length - 1){
+            println(" - Attempting self-test using built in tests...");
+            _exit = true;
+            _run = false;
+          }else{
+            arg = args[++i]; // get file containing tests
+            pair = split(arg, '=');
+            if(pair.length != 2){
+              println(" requires [source.ext=compare.ext] files, but was given: [" + arg + "]!");
+            }else{
+              extFile = new File(sketchPath(pair[0]));
+              File extFile2 = new File(sketchPath(pair[1]));
+              if(extFile.exists() && extFile2.exists()){
+                // run tests
+                println(" - Loading: [" + pair[0] + "] as source file, and [" + pair[1] + "] as compare file...");
+                _exit = true;
+                _run = false;
+              }else{
+                println("Error: one of the files passed to --self-test does not exist! [" + arg + "]");
+                _exit = true;
+                _run = false;
+              }
+            }
+          }
+          break;
+        
         default:
           println(" = unknown arg!");
       }
@@ -136,6 +163,11 @@ void setup(){
     println("--input=<file.ext> - Specify the input file.");
     println("\tOutput filename will be <input-filename>.obj");
     println("\t#include's will be opened and concatenated into a single output file.");
+    println();
+    println("--var <name=value> - Set a variable to a value.");
+    println();
+    println("--self-test [<name=value>] - Run tests to ensure Macro Preprocessor is correctly functioning.");
+    println("\tThis feature has not been finished yet, and does not currently do anything...");
     exit();
   }else{
     if(_run == true){
@@ -155,15 +187,15 @@ void startProcess(){
   _output.append(""); _output.append("");
   
   // boolean directive variables
-  updateVariable("__concatenateFiles", "true");
-  updateVariable("__maintainComments", "false");
-  updateVariable("__showLines", "false");
-  updateVariable("__initEmptyStacks", "false");
-  updateVariable("__ignoreMacroRecreate", "false");
+  createVariable("__concatenateFiles", "true", false);
+  createVariable("__maintainComments", "false", false);
+  createVariable("__showLines", "false", false);
+  createVariable("__initEmptyStacks", "false", false);
+  createVariable("__ignoreMacroRecreate", "false", false);
   
   // integer directive variables
-  updateVariable("__hyperVerboseOutput", "0");
-  updateVariable("__minLogLevel", "0");
+  createVariable("__hyperVerboseOutput", "0", false);
+  createVariable("__minLogLevel", "0", false);
   
   try{ // make every child function throw Exception?
     // CurrentWorker.getLine(-1); // gives an easy error...

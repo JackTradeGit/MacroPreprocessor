@@ -233,6 +233,12 @@ void parseLet(String variable, String action, String secondToken) throws Excepti
   }
 }
 
+void createVariable(String var_, String value_, boolean overwrite){
+  if(!_Vars.hasKey(var_) || overwrite){
+    updateVariable(var_, value_);
+  }
+}
+
 void updateVariable(String var_, String value_){
   _Vars.set(var_, value_);
   
