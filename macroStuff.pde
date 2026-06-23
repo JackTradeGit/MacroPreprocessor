@@ -1,9 +1,9 @@
-ArrayList<Macro> MacroStack = new ArrayList<Macro>(); // stack of macros for (nested) macros
-ArrayList<MacroArg[]> MacroArgsStack = new ArrayList<MacroArg[]>(); // stack of macro args for (nested) macros
+ArrayList<Macro> MacroStack; // stack of macros for (nested) macros
+ArrayList<MacroArg[]> MacroArgsStack; // stack of macro args for (nested) macros
 MacroArg[] CurrentMacroArgs;
-HashMap<String, Macro> Macros = new HashMap<String, Macro>(); // hashmap of defined macros
+HashMap<String, Macro> Macros; // hashmap of defined macros
 
-ArrayList<Worker> Workers = new ArrayList<Worker>(); // how do we handle which file/macro we're currently working on!?
+ArrayList<Worker> Workers; // how do we handle which file/macro we're currently working on!?
 Worker CurrentWorker;
 
 enum WorkerType{

@@ -228,6 +228,22 @@ PathReturn splitFilepath(String file){
   return output;
 }
 
+File[] getFiles(File folder_, boolean sortDate_){
+  File[] tmp = folder_.listFiles();
+  
+  if(sortDate_){
+    Arrays.sort(
+      tmp, new Comparator<File>(){
+        public int compare(File f1, File f2){
+          return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+        }
+      }
+    );
+  }
+  
+  return tmp;
+}
+
 boolean getNewFile(PathReturn base, PathReturn file){
   //println("getNewFile: " + base.toString() + " : " + file.toString());
   if(CurrentWorker != null){ Workers.add(new Worker(CurrentWorker)); }

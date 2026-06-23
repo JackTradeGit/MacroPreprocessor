@@ -69,10 +69,10 @@ String answerToStr(String func, String name, Object answer){
     return "\\!{parseFunction." + func + ": " + name + " is of unknown type!}";
 }
 
-String buildVersion(String maj, String min, String pat, String pre){
-  String version = "V" + maj + "." + min;
-  if(pat != null){ version += "." + pat; }
-  if(pre != null){ version += "-pr." + pre; }
+String buildVersion(String[] ver){
+  String version = "V" + ver[0] + "." + ver[1]; // Vmajor.minor
+  if(ver[2] != null){ version += "." + ver[2]; } // .patch
+  if(ver[3] != null){ version += "-pr." + ver[3]; } // -pr.prerelease
   return version;
 }
 

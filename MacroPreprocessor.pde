@@ -1,18 +1,22 @@
 import java.util.UUID; // used for generation of unique local labels
 import java.util.Map; // used for handling of _TmpGlobalVars
+import java.util.Arrays;
+import java.io.File;
+import java.util.Comparator;
 import org.quark.jasmine.*; // used for complex expression evaluation (#eval)
 
-StringList _output = new StringList();
+StringList _output;
 String _outputFile;
-boolean _exit = true;
+boolean _exit = false;
 boolean _run = false;
-StringDict _Vars = new StringDict(); // variables that can be changed
+StringDict _Vars; // variables that can be changed
 StringDict _Equates; // variables that are set once and can't be changed
-HashMap<String, String> _TmpGlobalVars = new HashMap<String, String>(); // ditto, but a way to easily save and restore global variables
-ArrayList<HashMap<String, String>> _TmpGlobalVarsArr = new ArrayList<HashMap<String, String>>(); // ditto, but a way to easily save and restore global variables
-HashMap<String, StringList> Stacks = new HashMap<String, StringList>(); // hashmap of data stacks for use in complex preprocessing
+HashMap<String, String> _TmpGlobalVars; // ditto, but a way to easily save and restore global variables
+ArrayList<HashMap<String, String>> _TmpGlobalVarsArr; // ditto, but a way to easily save and restore global variables
+HashMap<String, StringList> Stacks; // hashmap of data stacks for use in complex preprocessing
 
-StringList processedFiles = new StringList();
+StringList processedFiles;
+boolean forceTest = false;
 
 // How many changes, and how much effort, would it be to change _Vars, Stacks, and the other bits, to use Token's?
 
@@ -31,9 +35,9 @@ PathReturn CurrentDirectory; // current working directory for file includes...
 int CurrentInputIndex = 0;
 String CurrentLineInput; // current line from input being worked on
 String CurrentLineOutput; // current working line for output
-StringList _switch_Args = new StringList(); // stack for switch arguments
-ArrayList<String[]> _while_Args = new ArrayList<String[]>(); // stack for while loop arguments
-ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .again .while .repeat
+StringList _switch_Args; // stack for switch arguments
+ArrayList<String[]> _while_Args; // stack for while loop arguments
+ArrayList<int[]> _begin_Args; // stack for .begin .again .while .repeat
 
 //processing-java's directory must be added to PATH
 //--sketch refers to the directory, not the file
@@ -56,17 +60,21 @@ ArrayList<int[]> _begin_Args = new ArrayList<int[]>(); // stack for .begin .agai
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
-String _version_minor = "2";
-String _version_patch = "2";
+String _version_minor = "3";
+String _version_patch;// = "2";
 String _version_preRelease; // = "1"
-String _VERSION = buildVersion(_version_major, _version_minor, _version_patch, _version_preRelease);
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
+String _VERSION = buildVersion(_version);
 void setup(){
   println(_program_name + " " + _VERSION);
   println("sketchPath() = " + sketchPath());
   
+  initCore();
+  
+  boolean showHelp = false;
+  
   if(args != null){ // allows input from command line
-    for (int i = 0; i < args.length; i++) {
+    for (int i = 0; i < args.length && !_exit; i++) {
       String arg = args[i];
       print(arg);
       switch(arg){
@@ -84,6 +92,7 @@ void setup(){
             _run = true;
           }else{
             println("Error: file passed to --input does not exist! [" + arg + ".asm]");
+            showHelp = true;
             _exit = true;
             _run = false;
           }
@@ -95,6 +104,7 @@ void setup(){
           String[] pair = split(arg, '=');
           if(pair.length != 2){
             println(" - bad var assignment! - " + arg);
+            showHelp = true;
           }else{
             println(" - set variable \"" + pair[0] + "\" to \"" + pair[1] + "\"");
             updateVariable(pair[0], pair[1]);
@@ -102,39 +112,86 @@ void setup(){
           break;
         
         case "--help":
+          showHelp = true;
           _exit = true;
           _run = false;
+          break;
+        
+        case "--force-test":
+          forceTest = true;
           break;
         
         case "--self-test":
           if(i == args.length - 1){
             println(" - Attempting self-test using built in tests...");
-            _exit = true;
-            _run = false;
+            File tests_Source = new File(sketchPath("Tests/Source")); // Test source files
+            File tests_Destination = new File(sketchPath("Tests/Destination")); // Test output directory
+            File tests_Compare = new File(sketchPath("Tests/Compare")); // File to compare outputs to
+            
+            File[] testFiles = getFiles(tests_Source, true);
+            for(int j = 0; j < testFiles.length; j++){
+              initCore();
+              initBuiltinVars(true);
+              
+              String testName = split(testFiles[j].getName(), '.')[0];
+              if(testName.equals("README")){ continue; } // Skip README.txt file...
+              File testCompare = new File(tests_Compare + "/" + testName + ".bin");
+              
+              if(forceTest || testCompare.exists()){
+                println("Running test [" + testName + "] " + (j + 1) + "/" + testFiles.length);
+                _outputFile = tests_Destination + "/" + testName + ".bin";
+                
+                PathReturn filename = splitFilepath(testFiles[j].getName());
+                CurrentDirectory = filename;
+                getNewFile(splitFilepath(tests_Source.getAbsolutePath()), filename);
+                
+                startProcess(false);
+                
+                if(testCompare.exists()){
+                  byte[] fileCompare = loadBytes(testCompare);
+                  byte[] fileDestination = loadBytes(_outputFile);
+                  
+                  boolean testPassed = Arrays.equals(fileCompare, fileDestination);
+                  
+                  println(testPassed ? "Test Passed!" : "Test Failed!");
+                }
+              }else{
+                println("Test source file [" + testName + " does not have a 'Compare' file!");
+              }
+            }
           }else{
             arg = args[++i]; // get file containing tests
             pair = split(arg, '=');
             if(pair.length != 2){
               println(" requires [source.ext=compare.ext] files, but was given: [" + arg + "]!");
+              showHelp = true;
             }else{
               extFile = new File(sketchPath(pair[0]));
               File extFile2 = new File(sketchPath(pair[1]));
               if(extFile.exists() && extFile2.exists()){
-                // run tests
-                println(" - Loading: [" + pair[0] + "] as source file, and [" + pair[1] + "] as compare file...");
-                _exit = true;
-                _run = false;
+                if(extFile.equals(extFile2)){
+                  println(" - Error: [" + pair[0] + "] source file cannot be same as [" + pair[1] + "] compare file!");
+                  showHelp = true;
+                }else{
+                  // run tests
+                  println(" - Loading: [" + pair[0] + "] as source file, and [" + pair[1] + "] as compare file...");
+                }
               }else{
                 println("Error: one of the files passed to --self-test does not exist! [" + arg + "]");
-                _exit = true;
-                _run = false;
+                showHelp = true;
               }
             }
           }
+          _exit = true;
+          _run = false;
           break;
         
         default:
           println(" = unknown arg!");
+          showHelp = true;
+          _exit = true;
+          _run = false;
+          break;
       }
     }
   }else{
@@ -155,47 +212,27 @@ void setup(){
     }
   }
   
-  if(_exit){
-    println(_program_name + " " + _VERSION);
-    println();
-    println("--help - Show this help text. Congratulations.");
-    println();
-    println("--input=<file.ext> - Specify the input file.");
-    println("\tOutput filename will be <input-filename>.obj");
-    println("\t#include's will be opened and concatenated into a single output file.");
-    println();
-    println("--var <name=value> - Set a variable to a value.");
-    println();
-    println("--self-test [<name=value>] - Run tests to ensure Macro Preprocessor is correctly functioning.");
-    println("\tThis feature has not been finished yet, and does not currently do anything...");
-    exit();
-  }else{
-    if(_run == true){
-      startProcess();
-      exit();
-    }
+  if(!_exit && _run){
+    startProcess(true);
+    _exit = true;
   }
+  
+  if(showHelp){ printHelp(); }
+  if(_exit){ exit(); }
   
   //testRPN();
 }
 
-void startProcess(){
+void startProcess(boolean addHeader){
   int time = millis();
   
-  _output.append("; This .obj file was produced by: " + _program_name + " " + _VERSION); // append some data to the start of the output file
-  _output.append("; " + getLabelUUID());
-  _output.append(""); _output.append("");
+  if(addHeader){
+    _output.append("; This .obj file was produced by: " + _program_name + " " + _VERSION); // append some data to the start of the output file
+    _output.append("; " + getLabelUUID());
+    _output.append(""); _output.append("");
+  }
   
-  // boolean directive variables
-  createVariable("__concatenateFiles", "true", false);
-  createVariable("__maintainComments", "false", false);
-  createVariable("__showLines", "false", false);
-  createVariable("__initEmptyStacks", "false", false);
-  createVariable("__ignoreMacroRecreate", "false", false);
-  
-  // integer directive variables
-  createVariable("__hyperVerboseOutput", "0", false);
-  createVariable("__minLogLevel", "0", false);
+  initBuiltinVars(false);
   
   try{ // make every child function throw Exception?
     // CurrentWorker.getLine(-1); // gives an easy error...
@@ -218,6 +255,7 @@ void startProcess(){
 void fileSelected(File selection){
   if(selection == null){
     println("Did not select file to process");
+    printHelp();
     exit();
   }else{
     PathReturn filename = splitFilepath(selection.getName());
@@ -226,7 +264,7 @@ void fileSelected(File selection){
     _outputFile = new File(selection.getParent(), filename.Name + ".obj").toString();
     println("File Selected: Loading " + splitFilepath(selection.getParent()), filename);
     getNewFile(splitFilepath(selection.getParent()), filename);
-    startProcess();
+    startProcess(true);
     exit();
   }
 }
@@ -283,4 +321,55 @@ String getLastOutputLine(){
     return _output.get(_output.size() - 1);
   }
   return "";
+}
+
+void printHelp(){
+  println("Supported command line options:");
+  println();
+  println("--help - Show this helpful(?) text...");
+  println();
+  println("--input=<file.ext> - Specify the input file.");
+  println("\tOutput filename will be <input-filename>.obj");
+  println("\t#include's will be opened and concatenated into a single output file.");
+  println();
+  println("--var <name=value> - Set a variable to a value.");
+  println();
+  println("--self-test [<name=value>] - Run tests to ensure Macro Preprocessor is correctly functioning.");
+  println("\tThis feature has not been finished yet, and does not currently do anything...");
+}
+
+void initCore(){
+  _output = new StringList();
+  _Vars = new StringDict(); // variables that can be changed
+  //_Equates; // variables that are set once and can't be changed
+  _TmpGlobalVars = new HashMap<String, String>(); // ditto, but a way to easily save and restore global variables
+  _TmpGlobalVarsArr = new ArrayList<HashMap<String, String>>(); // ditto, but a way to easily save and restore global variables
+  Stacks = new HashMap<String, StringList>(); // hashmap of data stacks for use in complex preprocessing
+  
+  processedFiles = new StringList();
+  
+  _switch_Args = new StringList(); // stack for switch arguments
+  _while_Args = new ArrayList<String[]>(); // stack for while loop arguments
+  _begin_Args = new ArrayList<int[]>(); // stack for .begin .again .while .repeat
+  
+  MacroStack = new ArrayList<Macro>(); // stack of macros for (nested) macros
+  MacroArgsStack = new ArrayList<MacroArg[]>(); // stack of macro args for (nested) macros
+  CurrentMacroArgs = null;
+  Macros = new HashMap<String, Macro>(); // hashmap of defined macros
+  
+  Workers = new ArrayList<Worker>(); // how do we handle which file/macro we're currently working on!?
+  CurrentWorker = null;
+}
+
+void initBuiltinVars(boolean overwrite){
+  // boolean directive variables
+  createVariable("__concatenateFiles", "true", overwrite);
+  createVariable("__maintainComments", "false", overwrite);
+  createVariable("__showLines", "false", overwrite);
+  createVariable("__initEmptyStacks", "false", overwrite);
+  createVariable("__ignoreMacroRecreate", "false", overwrite);
+  
+  // integer directive variables
+  createVariable("__hyperVerboseOutput", "0", overwrite);
+  createVariable("__minLogLevel", "0", overwrite);
 }
