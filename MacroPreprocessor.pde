@@ -60,7 +60,7 @@ ArrayList<int[]> _begin_Args; // stack for .begin .again .while .repeat
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
-String _version_minor = "3";
+String _version_minor = "4";
 String _version_patch;// = "2";
 String _version_preRelease; // = "1"
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -118,68 +118,65 @@ void setup(){
           break;
         
         case "--force-test":
-          forceTest = true;
+          forceTest = true; // Used to make the tests generate their own 'Compare' files...
           break;
         
         case "--self-test":
-          if(i == args.length - 1){
-            println(" - Attempting self-test using built in tests...");
-            File tests_Source = new File(sketchPath("Tests/Source")); // Test source files
-            File tests_Destination = new File(sketchPath("Tests/Destination")); // Test output directory
-            File tests_Compare = new File(sketchPath("Tests/Compare")); // File to compare outputs to
-            
-            File[] testFiles = getFiles(tests_Source, true);
-            for(int j = 0; j < testFiles.length; j++){
-              initCore();
-              initBuiltinVars(true);
-              
-              String testName = split(testFiles[j].getName(), '.')[0];
-              if(testName.equals("README")){ continue; } // Skip README.txt file...
-              File testCompare = new File(tests_Compare + "/" + testName + ".bin");
-              
-              if(forceTest || testCompare.exists()){
-                println("Running test [" + testName + "] " + (j + 1) + "/" + testFiles.length);
-                _outputFile = tests_Destination + "/" + testName + ".bin";
-                
-                PathReturn filename = splitFilepath(testFiles[j].getName());
-                CurrentDirectory = filename;
-                getNewFile(splitFilepath(tests_Source.getAbsolutePath()), filename);
-                
-                startProcess(false);
-                
-                if(testCompare.exists()){
-                  byte[] fileCompare = loadBytes(testCompare);
-                  byte[] fileDestination = loadBytes(_outputFile);
-                  
-                  boolean testPassed = Arrays.equals(fileCompare, fileDestination);
-                  
-                  println(testPassed ? "Test Passed!" : "Test Failed!");
-                }
-              }else{
-                println("Test source file [" + testName + " does not have a 'Compare' file!");
-              }
+          println(" - Attempting self-test...");
+          File tests_Source = new File(sketchPath("Tests/Source")); // Test source files
+          File tests_Destination = new File(sketchPath("Tests/Destination")); // Test output directory
+          File tests_Compare = new File(sketchPath("Tests/Compare")); // File to compare outputs to
+          
+          if(!tests_Source.exists() || !tests_Destination.exists() || !tests_Compare.exists()){
+            println("One or more of the 'Tests' directories do not exist!");
+            if(!tests_Source.exists()){ println("Tests/Source does not exist!"); }
+            if(!tests_Destination.exists()){ println("Tests/Destination does not exist!"); }
+            if(!tests_Compare.exists()){ println("Tests/Compare does not exist!"); }
+            _exit = true;
+            continue;
+          }
+          
+          File[] testFiles = getFiles(tests_Source, true);
+          
+          boolean hasReadme = false; // Used to adjust test numbering
+          boolean reachedReadme = false; // Used to adjust test numbering
+          for(int j = 0; j < testFiles.length; j++){
+            if(testFiles[j].getName().equals("README.txt")){
+              hasReadme = true; // We'll need to subtract one from total...
             }
-          }else{
-            arg = args[++i]; // get file containing tests
-            pair = split(arg, '=');
-            if(pair.length != 2){
-              println(" requires [source.ext=compare.ext] files, but was given: [" + arg + "]!");
-              showHelp = true;
-            }else{
-              extFile = new File(sketchPath(pair[0]));
-              File extFile2 = new File(sketchPath(pair[1]));
-              if(extFile.exists() && extFile2.exists()){
-                if(extFile.equals(extFile2)){
-                  println(" - Error: [" + pair[0] + "] source file cannot be same as [" + pair[1] + "] compare file!");
-                  showHelp = true;
-                }else{
-                  // run tests
-                  println(" - Loading: [" + pair[0] + "] as source file, and [" + pair[1] + "] as compare file...");
-                }
-              }else{
-                println("Error: one of the files passed to --self-test does not exist! [" + arg + "]");
-                showHelp = true;
+          }
+          
+          for(int j = 0; j < testFiles.length; j++){
+            if(testFiles[j].getName().equals("README.txt")){
+              reachedReadme = true; // Adjust test numbering
+              continue; // Skip README.txt file...
+            }
+            
+            initCore();
+            initBuiltinVars(true);
+            
+            String testName = split(testFiles[j].getName(), '.')[0];
+            File testCompare = new File(tests_Compare + "/" + testName + ".bin");
+            
+            if(forceTest || testCompare.exists()){
+              println("Running test [" + testName + "] " + (j + (reachedReadme ? 0 : 1)) + "/" + (testFiles.length - (hasReadme ? 1 : 0)));
+              _outputFile = tests_Destination + "/" + testName + ".bin";
+              
+              PathReturn filename = splitFilepath(testFiles[j].getName());
+              CurrentDirectory = filename;
+              getNewFile(splitFilepath(tests_Source.getAbsolutePath()), filename);
+              
+              startProcess(false);
+              
+              if(testCompare.exists()){
+                byte[] fileCompare = loadBytes(testCompare);
+                byte[] fileDestination = loadBytes(_outputFile);
+                
+                boolean testPassed = Arrays.equals(fileCompare, fileDestination);
+                println(testPassed ? "Test Passed!" : "Test Failed!");
               }
+            }else{
+              println("Test source file [" + testName + "] does not have a 'Compare' file!");
             }
           }
           _exit = true;
