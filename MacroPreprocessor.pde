@@ -26,6 +26,7 @@ boolean showLines = false; // show all lines, including 'eaten' ones
 boolean concatenateFiles = true; // combine all input files into one output file
 boolean initEmptyStacks = false; // will an uninintialized stack be created on push, or generate an error?
 boolean ignoreMacroRecreate = false; // will an overwritten macro output a warning?
+boolean outputBinaryFile = false; // Do we use saveStrings() or spit out a binary file?
 
 // integer directive variables
 int hyperVerboseOutput = 0; // will all the println's in the universe be printed? (-1 = all, 0 = none)
@@ -60,7 +61,7 @@ ArrayList<int[]> _begin_Args; // stack for .begin .again .while .repeat
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
-String _version_minor = "4";
+String _version_minor = "5";
 String _version_patch;// = "2";
 String _version_preRelease; // = "1"
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -241,7 +242,26 @@ void startProcess(boolean addHeader){
   print("Stacks: "); printArray(Stacks);
   print("Variables: "); printArray(_Vars);
   println("Output file: " + _outputFile);
-  saveStrings(_outputFile, _output.toArray());
+  
+  if(!outputBinaryFile){
+    saveStrings(_outputFile, _output.toArray());
+  }else{
+    int totalBytes = 0;
+    for(int i = 0; i < _output.size(); i++){
+      totalBytes += _output.get(i).length(); // has to be done this way due to saveStrings appending \r\n after every line...
+    }
+    
+    byte[] bytes = new byte[totalBytes];
+    int index = 0;
+    for(int i = 0; i < _output.size(); i++){
+      String line = _output.get(i);
+      for(int j = 0; j < line.length(); j++){
+        bytes[index++] = (byte)line.charAt(j); // TODO: this does not account for multi-byte characters!
+      }
+    }
+    
+    saveBytes(_outputFile, bytes);
+  }
   
   print("Total Macros: " + Macros.size());printArray(Macros);
   println("Total Macro Args Pushed: " + MacroArgsStack.size()); // should be 0 when done
@@ -365,6 +385,7 @@ void initBuiltinVars(boolean overwrite){
   createVariable("__showLines", "false", overwrite);
   createVariable("__initEmptyStacks", "false", overwrite);
   createVariable("__ignoreMacroRecreate", "false", overwrite);
+  createVariable("__outputBinaryFile", "false", overwrite);
   
   // integer directive variables
   createVariable("__hyperVerboseOutput", "0", overwrite);

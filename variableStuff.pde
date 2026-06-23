@@ -273,6 +273,7 @@ void updateVariable(String var_, String value_){
           case "__concatenateFiles": concatenateFiles = valueBool; break;
           case "__initEmptyStacks": initEmptyStacks = valueBool; break;
           case "__ignoreMacroRecreate": ignoreMacroRecreate = valueBool; break;
+          case "__outputBinaryFile": outputBinaryFile = valueBool; break;
         }
         break;
     }
