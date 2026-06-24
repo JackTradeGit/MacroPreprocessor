@@ -256,7 +256,7 @@ void updateVariable(String var_, String value_){
           default:
             Token tmp = null; // might want to do this at top of function, then switch on tmp.Type
             try{ tmp = parseVariables(value_, true); }
-            catch(Exception e){ log(Log.Always, Log.Error, Log.Console, "How in the heck did you create an error while setting a variable!? " + e.toString()); }
+            catch(Exception e){ log(Log.Error, "How in the heck did you create an error while setting a variable!? " + e.toString()); }
             
             if(tmp != null && tmp.Number){
               switch(var_){ // update numerical directive variables

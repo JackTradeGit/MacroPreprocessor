@@ -62,7 +62,7 @@ ArrayList<int[]> _begin_Args; // stack for .begin .again .while .repeat
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
-String _version_minor = "7";
+String _version_minor = "8";
 String _version_patch;// = "2";
 String _version_preRelease; // = "1"
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -131,15 +131,17 @@ void setup(){
           File tests_Compare = new File(sketchPath("Tests/Compare")); // File to compare outputs to
           
           if(!tests_Source.exists() || !tests_Destination.exists() || !tests_Compare.exists()){
-            println("One or more of the 'Tests' directories do not exist!");
-            if(!tests_Source.exists()){ println("Tests/Source does not exist!"); }
-            if(!tests_Destination.exists()){ println("Tests/Destination does not exist!"); }
-            if(!tests_Compare.exists()){ println("Tests/Compare does not exist!"); }
+            log(Log.Error, "One or more of the 'Tests' directories do not exist!");
+            if(!tests_Source.exists()){ log(Log.Error, "Tests/Source does not exist!"); }
+            if(!tests_Destination.exists()){ log(Log.Error, "Tests/Destination does not exist!"); }
+            if(!tests_Compare.exists()){ log(Log.Error, "Tests/Compare does not exist!"); }
             _exit = true;
             continue;
           }
           
           File[] testFiles = getFiles(tests_Source, true);
+          log(Log.Normal, "Total tests to run: " + testFiles.length);
+          int testsPassed = 0;
           
           for(int j = 0; j < testFiles.length; j++){
             initCore();
@@ -149,7 +151,7 @@ void setup(){
             File testCompare = new File(tests_Compare + "/" + testName + ".bin");
             
             if(forceTest || testCompare.exists()){
-              println("Running test [" + testName + "] " + (j + 1) + "/" + testFiles.length);
+              println(); log(Log.Normal, "Running test [" + testName + "] " + (j + 1) + "/" + testFiles.length);
               _outputFile = tests_Destination + "/" + testName + ".bin";
               
               PathReturn filename = splitFilepath(testFiles[j].getName());
@@ -163,12 +165,19 @@ void setup(){
                 byte[] fileDestination = loadBytes(_outputFile);
                 
                 boolean testPassed = Arrays.equals(fileCompare, fileDestination);
-                println(testPassed ? "Test Passed!" : "Test Failed!");
+                if(testPassed){
+                  log(Log.Normal, "Test Passed!");
+                  testsPassed ++;
+                }else{
+                  log(Log.Error, "Test Failed!");
+                }
               }
             }else{
-              println("Test source file [" + testName + "] does not have a 'Compare' file!");
+              log(Log.Error, "Test source file [" + testName + "] does not have a 'Compare' file!");
             }
           }
+          
+          println(); log(testsPassed == testFiles.length ? Log.Normal : Log.Error, "Tests passed: " + testsPassed + "/" + testFiles.length);
           _exit = true;
           _run = false;
           break;
@@ -204,6 +213,13 @@ void setup(){
     _exit = true;
   }
   
+  //for(int i = 0; i < Log.Foreground.length; i++){
+  //  for(int j = 0; j < Log.Background.length; j++){
+  //    print(Log.Foreground[i] + Log.Background[j] + "#");
+  //  }
+  //  println(Log.CTRL_ResetFG + Log.CTRL_ResetBG);
+  //}
+  
   if(showHelp){ printHelp(); }
   if(_exit){ exit(); }
   
@@ -225,7 +241,7 @@ void startProcess(boolean addHeader){
     // CurrentWorker.getLine(-1); // gives an easy error...
     processInput(0, ParseState.Entry);
   }catch(Exception e){ // allows for soft errors instead of hard ones...
-    log(Log.Always, Log.Error, Log.Console, e.toString());
+    log(Log.Error, e.toString());
   }
   
   print("Stacks: "); printArray(Stacks);
