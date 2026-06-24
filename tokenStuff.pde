@@ -117,81 +117,93 @@ Token getNextToken(boolean allowEscape) throws Exception{
   return new Token(token, CurrentInputIndex, false);
 }
 
+enum CleanEscapeState{
+  Done,
+  Initial,
+  StartCurly,
+  BuildCurly,
+  StartHex,
+  EndHex,
+  BuildOctal,
+  RubyFirst,
+  RubyNext,
+  RubyFinal
+}
+String hexNotUnicode(String input){
+  return hexNotUnicode ? "0x" + input : "\\u{" + input + "}";
+}
 Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
   //println("[" + line + "]{" + index + "}");
   if(line.length() > 0 && index < line.length() && line.charAt(index) == '\\'){ index++; } // eat the incoming '\\'
   
   String token = "";
-  int state = 0;
+  CleanEscapeState state = CleanEscapeState.Initial;
   TokenType type = TokenType.String;
-  boolean outputEscape = true;
+  boolean outputEscape = false;
+  boolean wasUnicode = false;
   
-  for(; index < line.length() && state != -1; index++){
+  for(; index < line.length() && state != CleanEscapeState.Done; index++){
     char c = line.charAt(index);
     //print(c);
     switch(state){
-      case 0:
-        state = -1; // default is to finish after one character
+      case Initial:
+        state = CleanEscapeState.Done; // default is to finish after one character
         switch(c){
           case '0': // NULL or Octal Character (\033)
-            state = 5;
+            state = CleanEscapeState.BuildOctal;
             break;
           case 'a': // BELL
-            token += hexNotUnicode ? "0x07" : "\\u{07}";
+            token += hexNotUnicode("07");
             break;
           case 'b': // BACKSPACE
-            token += hexNotUnicode ? "0x08" : "\\u{08}";
+            token += hexNotUnicode("08");
             break;
           case 'e': // ESCAPE SEQUENCE (\e, \x1B, \033, 27, ^[)
-            token += hexNotUnicode ? "0x1B" : "\\u{1B}";
+            token += hexNotUnicode("1B");
             break;
           case 'f': // FORM FEED
-            token += hexNotUnicode ? "0x0C" : "\\u{0C}";
+            token += hexNotUnicode("0C");
             break;
           case 'n': // NEWLINE
-            token += hexNotUnicode ? "0x0A" : "\\u{0A}";
+            token += hexNotUnicode("0A");
             break;
           case 'r': // CARRIAGE RETURN
-            token += hexNotUnicode ? "0x0D" : "\\u{0D}";
+            token += hexNotUnicode("0D");
             break;
           case 't': // TAB
-            token += hexNotUnicode ? "0x09" : "\\u{09}";
+            token += hexNotUnicode("09");
             break;
           case 'u': // unicode
-            token += "\\u"; // TODO: doesn't support __hexNotUnicode, yet...
-            state = 1;
+            wasUnicode = true;
+            state = CleanEscapeState.StartCurly;
             break;
           case 'v': // VERTICAL TAB
-            token += hexNotUnicode ? "0x0B" : "\\u{0B}";
+            token += hexNotUnicode("0B");
             break;
           case 'x': // Hexadecimal Character (\x1B)
-            token += "\\u{"; // TODO: doesn't support __hexNotUnicode, yet...
-            state = 3;
+            state = CleanEscapeState.StartHex;
             break;
           case '!': // error output
             token += "\\!";
+            outputEscape = true;
             type = TokenType.Error;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '#': // built-in function
-            outputEscape = false;
             type = TokenType.Function;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '%': // macro arg
-            outputEscape = false;
             type = TokenType.Argument;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '&': // global var
-            outputEscape = false;
             type = TokenType.Variable;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '$': // built-in var
-            outputEscape = false;
             type = TokenType.Builtin;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '~': // transitory macro variable
             //ArrayList<StringDict> _TmpMacroVars;
@@ -201,40 +213,39 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
             //this allows and endless number of temporary variables that are contained within their own macro instance
             break;
           case '^': // stack operations
-            outputEscape = false;
             type = TokenType.StackFunction;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '>': // file operations
-            outputEscape = false;
             type = TokenType.FileFunction;
-            state = 1;
+            state = CleanEscapeState.StartCurly;
             break;
           case '(': // escaped open-paren means we need to do infixToRPN stuff
             // doing infix to RPN conversion and then emitting the result is useful for asm-time forth stuff
             //token += lineToRPN(line, index);
             break;
           case '[': // Ruby Range Syntax (e.g. [1..4] == [1,2,3,4])([1,2,10..13] == [1,2,10,11,12,13])([1..4,10..8] == [1,2,3,4,10,9,8])
-            state = 10; // look for first number or ..
+            state = CleanEscapeState.RubyFirst; // look for first number or ..
             break;
           default:
-            token += hexNotUnicode ? "0x" + hex(c) : "\\u{" + hex(c) + "}";
+            token += hexNotUnicode(hex(c));
             break;
         }
         break;
       
-      case 1: // start unicode
+      case StartCurly: // start unicode
         if(c == '{'){
           if(outputEscape){ token += c; }
-          state = 2;
+          state = CleanEscapeState.BuildCurly;
         }
         break;
       
-      case 2: // build unicode
+      case BuildCurly: // build unicode
         switch(c){
           case '}':
             if(outputEscape){ token += c; }
-            state = -1;
+            if(wasUnicode){ token = hexNotUnicode(token); }
+            state = CleanEscapeState.Done;
             break;
           
           case '\\':
@@ -259,43 +270,55 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
         }
         break;
       
-      case 3:
+      case StartHex:
         token += c;
-        state = 4;
+        state = CleanEscapeState.EndHex;
         break;
       
-      case 4:
-        token += c + "}";
-        state = -1;
+      case EndHex:
+        token = hexNotUnicode(token + c);
+        state = CleanEscapeState.Done;
         break;
       
-      case 5:
+      case BuildOctal:
         if(isOctal(c)){
           token += c;
         }else{
-          if(token.length() == 0){ token = hexNotUnicode ? "0x00" : "\\u{00}"; } // escaped NULL
-          else{ token = hexNotUnicode ? "0x" + octalToHex(token) : "\\u{" + octalToHex(token) + "}"; } // escaped octal
+          if(token.length() == 0){ token = hexNotUnicode("00"); } // escaped NULL
+          else{ token = hexNotUnicode(octalToHex(token)); } // escaped octal
           index--;
-          state = -1;
+          state = CleanEscapeState.Done;
         }
         break;
       
-      case 10: // look for first number or '..' --- a ']' would be an error (empty range)
-      case 11: // look for next number '..' ']' --- split on ',' or ' '
-      case 12: // found all sections of range, go through it and produce final output
+      case RubyFirst: // look for first number or '..' --- a ']' would be an error (empty range)
+      case RubyNext: // look for next number '..' ']' --- split on ',' or ' '
+      case RubyFinal: // found all sections of range, go through it and produce final output
         token += c;
         if(c == ']'){
           token = "\\!{Ruby Range Syntax is not yet implemented! - [" + token + "}";
-          state = -1;
+          state = CleanEscapeState.Done;
         }
+        break;
+      
+      default:
+        token = "\\!{CleanEscape: state machine in unknown state, " + state.name() + "}";
+        state = CleanEscapeState.Done;
         break;
     }
   }
   
   switch(state){ // if we hit the end of input without finishing a state...
-    case 5:
-      if(token.length() == 0){ token = hexNotUnicode ? "0x00" : "\\u{00}"; } // escaped NULL
-      else{ token = hexNotUnicode ? "0x" + octalToHex(token) : "\\u{" + octalToHex(token) + "}"; } // escaped octal
+    case Done:
+      break;
+    
+    case BuildOctal:
+      if(token.length() == 0){ token = hexNotUnicode("00"); } // escaped NULL
+      else{ token = hexNotUnicode(octalToHex(token)); } // escaped octal
+      break;
+    
+    default:
+      token = "\\!{CleanEscape: input resulted in state machine ending in unfinished state, " + state.name() + "}";
       break;
   }
   
