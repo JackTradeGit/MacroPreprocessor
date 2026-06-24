@@ -274,6 +274,7 @@ void updateVariable(String var_, String value_){
           case "__initEmptyStacks": initEmptyStacks = valueBool; break;
           case "__ignoreMacroRecreate": ignoreMacroRecreate = valueBool; break;
           case "__outputBinaryFile": outputBinaryFile = valueBool; break;
+          case "__hexNotUnicode": hexNotUnicode = valueBool; break;
         }
         break;
     }

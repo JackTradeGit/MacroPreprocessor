@@ -27,6 +27,7 @@ boolean concatenateFiles = true; // combine all input files into one output file
 boolean initEmptyStacks = false; // will an uninintialized stack be created on push, or generate an error?
 boolean ignoreMacroRecreate = false; // will an overwritten macro output a warning?
 boolean outputBinaryFile = false; // Do we use saveStrings() or spit out a binary file?
+boolean hexNotUnicode = false; // do we output 0x??, or \\u{??} for escaped value?
 
 // integer directive variables
 int hyperVerboseOutput = 0; // will all the println's in the universe be printed? (-1 = all, 0 = none)
@@ -61,7 +62,7 @@ ArrayList<int[]> _begin_Args; // stack for .begin .again .while .repeat
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
-String _version_minor = "5";
+String _version_minor = "6";
 String _version_patch;// = "2";
 String _version_preRelease; // = "1"
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};
@@ -71,6 +72,7 @@ void setup(){
   println("sketchPath() = " + sketchPath());
   
   initCore();
+  initBuiltinVars(false);
   
   boolean showHelp = false;
   
@@ -139,20 +141,7 @@ void setup(){
           
           File[] testFiles = getFiles(tests_Source, true);
           
-          boolean hasReadme = false; // Used to adjust test numbering
-          boolean reachedReadme = false; // Used to adjust test numbering
           for(int j = 0; j < testFiles.length; j++){
-            if(testFiles[j].getName().equals("README.txt")){
-              hasReadme = true; // We'll need to subtract one from total...
-            }
-          }
-          
-          for(int j = 0; j < testFiles.length; j++){
-            if(testFiles[j].getName().equals("README.txt")){
-              reachedReadme = true; // Adjust test numbering
-              continue; // Skip README.txt file...
-            }
-            
             initCore();
             initBuiltinVars(true);
             
@@ -160,7 +149,7 @@ void setup(){
             File testCompare = new File(tests_Compare + "/" + testName + ".bin");
             
             if(forceTest || testCompare.exists()){
-              println("Running test [" + testName + "] " + (j + (reachedReadme ? 0 : 1)) + "/" + (testFiles.length - (hasReadme ? 1 : 0)));
+              println("Running test [" + testName + "] " + (j + 1) + "/" + testFiles.length);
               _outputFile = tests_Destination + "/" + testName + ".bin";
               
               PathReturn filename = splitFilepath(testFiles[j].getName());
@@ -386,6 +375,7 @@ void initBuiltinVars(boolean overwrite){
   createVariable("__initEmptyStacks", "false", overwrite);
   createVariable("__ignoreMacroRecreate", "false", overwrite);
   createVariable("__outputBinaryFile", "false", overwrite);
+  createVariable("__hexNotUnicode", "false", overwrite);
   
   // integer directive variables
   createVariable("__hyperVerboseOutput", "0", overwrite);

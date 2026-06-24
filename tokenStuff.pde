@@ -137,35 +137,35 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
             state = 5;
             break;
           case 'a': // BELL
-            token += "\\u{07}";
+            token += hexNotUnicode ? "0x07" : "\\u{07}";
             break;
           case 'b': // BACKSPACE
-            token += "\\u{08}";
+            token += hexNotUnicode ? "0x08" : "\\u{08}";
             break;
           case 'e': // ESCAPE SEQUENCE (\e, \x1B, \033, 27, ^[)
-            token += "\\u{1B}";
+            token += hexNotUnicode ? "0x1B" : "\\u{1B}";
             break;
           case 'f': // FORM FEED
-            token += "\\u{0C}";
+            token += hexNotUnicode ? "0x0C" : "\\u{0C}";
             break;
           case 'n': // NEWLINE
-            token += "\\u{0A}";
+            token += hexNotUnicode ? "0x0A" : "\\u{0A}";
             break;
           case 'r': // CARRIAGE RETURN
-            token += "\\u{0D}";
+            token += hexNotUnicode ? "0x0D" : "\\u{0D}";
             break;
           case 't': // TAB
-            token += "\\u{09}";
+            token += hexNotUnicode ? "0x09" : "\\u{09}";
             break;
           case 'u': // unicode
-            token += "\\u";
+            token += "\\u"; // TODO: doesn't support __hexNotUnicode, yet...
             state = 1;
             break;
           case 'v': // VERTICAL TAB
-            token += "\\u{0B}";
+            token += hexNotUnicode ? "0x0B" : "\\u{0B}";
             break;
           case 'x': // Hexadecimal Character (\x1B)
-            token += "\\u{";
+            token += "\\u{"; // TODO: doesn't support __hexNotUnicode, yet...
             state = 3;
             break;
           case '!': // error output
@@ -218,7 +218,7 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
             state = 10; // look for first number or ..
             break;
           default:
-            token += "\\u{" + hex(c) + "}";
+            token += hexNotUnicode ? "0x" + hex(c) : "\\u{" + hex(c) + "}";
             break;
         }
         break;
@@ -273,7 +273,8 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
         if(isOctal(c)){
           token += c;
         }else{
-          token = "\\u{" + octalToHex(token) + "}";
+          if(token.length() == 0){ token = hexNotUnicode ? "0x00" : "\\u{00}"; } // escaped NULL
+          else{ token = hexNotUnicode ? "0x" + octalToHex(token) : "\\u{" + octalToHex(token) + "}"; } // escaped octal
           index--;
           state = -1;
         }
@@ -289,6 +290,13 @@ Token cleanEscape(String line, int index, boolean runFunction) throws Exception{
         }
         break;
     }
+  }
+  
+  switch(state){ // if we hit the end of input without finishing a state...
+    case 5:
+      if(token.length() == 0){ token = hexNotUnicode ? "0x00" : "\\u{00}"; } // escaped NULL
+      else{ token = hexNotUnicode ? "0x" + octalToHex(token) : "\\u{" + octalToHex(token) + "}"; } // escaped octal
+      break;
   }
   
   switch(type){

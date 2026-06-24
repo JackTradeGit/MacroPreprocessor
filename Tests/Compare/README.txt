@@ -1,1 +1,0 @@
-Put comparison files of tests into this folder, names must match source files!
