@@ -82,6 +82,25 @@ String parseFunction(String input) throws Exception{
     //case "args": // get multiple macro args by index using ruby syntax? [1..4,10..8] == [1,2,3,4,10,9,8]
       //break;
     
+    case "ifdef":
+      return _Vars.hasKey(args[1].Name) ? "true" : "false";
+    
+    case "ifndef":
+      return !_Vars.hasKey(args[1].Name) ? "true" : "false";
+    
+    case "ifmacro":
+      return Macros.containsKey(args[1].Name) ? "true" : "false";
+    
+    case "ifnmacro":
+      return !Macros.containsKey(args[1].Name) ? "true" : "false";
+    
+    case "and": return checkBoolean(args[1], args[2], checkBooleanAction.AND);
+    case "or": return checkBoolean(args[1], args[2], checkBooleanAction.OR);
+    case "xor": return checkBoolean(args[1], args[2], checkBooleanAction.XOR);
+    case "nand": return checkBoolean(args[1], args[2], checkBooleanAction.NAND);
+    case "nor": return checkBoolean(args[1], args[2], checkBooleanAction.NOR);
+    case "xnor": return checkBoolean(args[1], args[2], checkBooleanAction.XNOR);
+    
     case "pushTmp": // save a global var to the stack and set it to a tmp value
       _TmpGlobalVars.put(args[1].Name,_Vars.get(args[1].Name));
       updateVariable(args[1].Name, args[2].Name);

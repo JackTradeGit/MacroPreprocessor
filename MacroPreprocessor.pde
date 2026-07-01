@@ -62,7 +62,7 @@ ArrayList<int[]> _begin_Args; // stack for .begin .again .while .repeat
 
 String _program_name = "Macro Preprocessor";
 String _version_major = "5";
-String _version_minor = "8";
+String _version_minor = "9";
 String _version_patch;// = "2";
 String _version_preRelease; // = "1"
 String[] _version = {_version_major, _version_minor, _version_patch, _version_preRelease};

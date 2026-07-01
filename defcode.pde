@@ -56,6 +56,41 @@ String lowerCase(String input){
   return input.toLowerCase();
 }
 
+int checkBoolean(String input){
+  switch(input.toLowerCase()){
+    case "true": return 1;
+    case "false": return 0;
+    default: return -1;
+  }
+}
+
+enum checkBooleanAction{
+  AND,
+  OR,
+  XOR,
+  NAND,
+  NOR,
+  XNOR,
+}
+String checkBoolean(MacroArg a, MacroArg b, checkBooleanAction action){
+  int A = checkBoolean(a.Name);
+  int B = checkBoolean(b.Name);
+  
+  if(A == -1 || B == -1){ return "\\!{checkBoolean: A or B input is not a bool!}"; }
+  
+  boolean output = false;
+  switch(action){
+    case AND: output = A + B == 2; break;
+    case OR: output = A + B >= 1; break;
+    case XOR: output = A != B; break;
+    case NAND: output = A + B != 2; break;
+    case NOR: output = A + B < 2; break;
+    case XNOR: output = A == B; break;
+  }
+  
+  return output ? "true" : "false";
+}
+
 String answerToStr(String func, String name, Object answer){
   if (answer instanceof Boolean) 
     return str(((Boolean) answer).booleanValue());
